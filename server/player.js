@@ -4,9 +4,7 @@ const Cards = require('./cards');
 
 const addCards = (player, cards) => ({
   ...player,
-  cards,
-  isWatching: null,
-  nbrCardsDiscovered: 0
+  cards
 });
 
 const addCard = (player, cardToAdd) => {
@@ -36,7 +34,7 @@ const create = name => ({
   tmpCard: null // Card the player pick (discard or draw pile)
 });
 
-const isDone = ({ cards }) => cards.every(card => !card);
+const isDone = player => player.cards.every(card => card === null);
 
 const incrementNbrCardsDiscovered = player => ({
   ...player,
