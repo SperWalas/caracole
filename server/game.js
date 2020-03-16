@@ -6,7 +6,6 @@ const Player = require('./player');
 const Players = require('./players');
 
 const addCardToPlayer = (game, playerId, card) => {
-  console.log('addCardToPlayer', { playerId, card });
   const { players } = game;
   const player = players[playerId];
 
@@ -14,7 +13,7 @@ const addCardToPlayer = (game, playerId, card) => {
     ...game,
     players: {
       ...players,
-      [player.id]: Player.addCards(player, card)
+      [player.id]: Player.addCard(player, card)
     }
   };
 };
@@ -104,7 +103,11 @@ const isCardCanBeThrown = (game, card) => {
 const isDone = game => {
   const { players: playersCollection } = game;
   const players = Object.values(playersCollection);
-  return players.find(Player.isDone);
+  console.log({ players });
+  return players.find(p => {
+    console.log({ p });
+    return Player.isDone(p);
+  });
 };
 
 const mask = game => {
