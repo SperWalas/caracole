@@ -3,14 +3,7 @@ import useSocket from '../../hooks/useSocket';
 
 const Game = ({ game, playerId }) => {
   const [tmpCard, setTmpCard] = useState(null);
-  const {
-    discardPile,
-    id: gameId,
-    name,
-    nextActions,
-    players,
-    isStarted
-  } = game;
+  const { discardPile, id: gameId, name, nextActions, players, isStarted } = game;
 
   const nextAction = nextActions.length && nextActions[0];
   const isToPlayerToPlay = nextAction && nextAction.playerId === playerId;
@@ -73,12 +66,9 @@ const Game = ({ game, playerId }) => {
           <button
             key={idx}
             onClick={() =>
-              !isStarted ||
-              (isToPlayerToPlay && playerAction.action === 'watch')
+              !isStarted || (isToPlayerToPlay && playerAction.action === 'watch')
                 ? handleWatchCard(idx, cardPlayerId)
-                : cardPlayerId === playerId &&
-                  isToPlayerToPlay &&
-                  playerAction.action === 'give'
+                : cardPlayerId === playerId && isToPlayerToPlay && playerAction.action === 'give'
                 ? handleGiveCard(idx, cardPlayerId)
                 : handleThrowHandCard(idx, cardPlayerId)
             }
@@ -116,9 +106,7 @@ const Game = ({ game, playerId }) => {
         <div>
           <div>
             Last card :
-            {discardPile.length
-              ? `${discardPile[0].value} of ${discardPile[0].suit}`
-              : 'No card'}
+            {discardPile.length ? `${discardPile[0].value} of ${discardPile[0].suit}` : 'No card'}
             {playerAction && playerAction.action === 'pick' && (
               <button onClick={handlePickDiscardCard}>Pick</button>
             )}
@@ -138,11 +126,7 @@ const Game = ({ game, playerId }) => {
             <div key={`game${pid}`} style={{ marginTop: '10px' }}>
               <span>{isPlayer ? 'you' : name}</span>
               {!isReady
-                ? pid === playerId && (
-                    <button onClick={handleSetPlayerReady}>
-                      Set as isReady
-                    </button>
-                  )
+                ? pid === playerId && <button onClick={handleSetPlayerReady}>Set as isReady</button>
                 : ' is ready'}
               <p>{renderPlayerCard(player)}</p>
               {isPlayer && tmpCard && (

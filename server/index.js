@@ -145,8 +145,8 @@ io.on('connection', socket => {
       game = Game.removeDrawCard(game);
       game = Game.addCardToPlayer(game, playerId, cardToAdd);
 
-      const cardThrown = Game.getCard(game, card);
       // TODO: Reveal a card to anyone
+      // const cardThrown = Game.getCard(game, card);
       // io.to(game.id).emit('game.card', {
       //   ...cardThrown,
       //   ...card

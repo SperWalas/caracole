@@ -66,19 +66,14 @@ const create = name => ({
 
 const canStart = game => {
   const { players: playersCollection } = game;
-  return (
-    Players.areAllReady(playersCollection) &&
-    Players.getCount(playersCollection) > 1
-  );
+  return Players.areAllReady(playersCollection) && Players.getCount(playersCollection) > 1;
 };
 
 const end = game => {
   console.log('end');
   const { players: playersCollection } = game;
   // Calc scores
-  const playersCollectionWithScoresUpdated = Players.calcScores(
-    playersCollection
-  );
+  const playersCollectionWithScoresUpdated = Players.calcScores(playersCollection);
   // Reset isReady status to false for all players
   const playersCollectionHasUnready = Players.setAllIsReady(
     playersCollectionWithScoresUpdated,
@@ -129,8 +124,8 @@ const givePlayerCard = (game, playerId, card) => {
   const cardToGive = getCard(game, card);
   // Find to whom player should give
   const [{ playerIdToGiveTo }] = oldActions;
-  const playerToAddACard = player[playerIdToGiveTo];
-  const playerToRemoveACard = player[playerId];
+  const playerToAddACard = players[playerIdToGiveTo];
+  const playerToRemoveACard = players[playerId];
 
   return {
     ...game,
@@ -156,7 +151,7 @@ const removeDrawCard = game => {
   drawPile = drawPile.slice(1);
   if (!drawPile.length) {
     discardPile = game.discardPile.slice(-1);
-    drawPile = Card.shuffleDeck(game.discardPile.slice(0, -1));
+    drawPile = Cards.shuffleDeck(game.discardPile.slice(0, -1));
   }
 
   return {
@@ -169,11 +164,7 @@ const removeDrawCard = game => {
 const setCardToDiscardPile = (game, playerId, card) => {
   console.log('setCardToDiscardPile', { playerId, card });
 
-  let {
-    discardPile,
-    nextActions: oldActions,
-    players: playersCollection
-  } = game;
+  let { discardPile, nextActions: oldActions, players: playersCollection } = game;
   const cardToThrow = getCard(game, card);
   let player = playersCollection[card.playerId];
   let nextActions = [];
@@ -210,10 +201,7 @@ const setCardToDiscardPile = (game, playerId, card) => {
   // When player have to give a card to an other player
   // This action should be the next in the queue
   if (playerId !== card.playerId) {
-    nextActions = [
-      { playerId, action: 'give', playerIdToGiveTo: card.playerId },
-      ...nextActions
-    ];
+    nextActions = [{ playerId, action: 'give', playerIdToGiveTo: card.playerId }, ...nextActions];
   }
 
   return {
@@ -330,10 +318,7 @@ const setup = game => {
   const shuffledDeck = Cards.shuffleDeck(deckOfCards);
   const cardsForPlayers = shuffledDeck.slice(0, nbrCardsForPlayers);
   // First card to be discovered
-  const discardPile = shuffledDeck.slice(
-    nbrCardsForPlayers,
-    nbrCardsForPlayers + 1
-  );
+  const discardPile = shuffledDeck.slice(nbrCardsForPlayers, nbrCardsForPlayers + 1);
   const drawPile = shuffledDeck.slice(nbrCardsForPlayers + 1);
 
   // Give card to players

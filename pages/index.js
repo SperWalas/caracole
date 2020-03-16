@@ -18,11 +18,7 @@ const Home = () => {
     setPlayerId(playerId);
   });
 
-  return (
-    <main>
-      {game ? <Game game={game} playerId={playerId} /> : <LoginForm />}
-    </main>
-  );
+  return <main>{game ? <Game game={game} playerId={playerId} /> : <LoginForm />}</main>;
 };
 
 export default Home;

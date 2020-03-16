@@ -58,9 +58,7 @@ const replaceCard = (player, cardToReplace) => {
   return {
     ...player,
     tmpCard: null,
-    cards: cards.map((card, index) =>
-      index === cardToReplace.index ? tmpCard : card
-    )
+    cards: cards.map((card, index) => (index === cardToReplace.index ? tmpCard : card))
   };
 };
 
@@ -76,7 +74,7 @@ const setIsWatching = (player, card = null) => ({
 
 const setScore = (player, isFirstToFinish = false) => ({
   ...player,
-  scores: [...player.scores, isFirstToFinish ? -5 : Cards.calcScore(cards)]
+  scores: [...player.scores, isFirstToFinish ? -5 : Cards.calcScore(player.cards)]
 });
 
 const setTmpCard = (player, tmpCard) => ({
