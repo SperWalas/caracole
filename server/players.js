@@ -36,10 +36,7 @@ const distributeCards = (playersCollection, cardsToDistribute) => {
   const players = Object.values(playersCollection);
 
   return players.reduce((playersWithCards, player, idx) => {
-    const cards = cardsToDistribute.slice(
-      nbrPerPlayer * idx,
-      nbrPerPlayer * (idx + 1)
-    );
+    const cards = cardsToDistribute.slice(nbrPerPlayer * idx, nbrPerPlayer * (idx + 1));
     return {
       ...playersWithCards,
       [player.id]: Player.addCards(player, cards)
@@ -57,9 +54,7 @@ const getDealer = playersCollection => {
 // Get next player that plays after another
 const getNext = (playersCollection, playerBefore) => {
   const players = Object.values(playersCollection);
-  return players.find(
-    player => player.order === (playerBefore.order + 1) % players.length
-  );
+  return players.find(player => player.order === (playerBefore.order + 1) % players.length);
 };
 
 const getRandom = playersCollection => {

@@ -5,12 +5,12 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "build": "next build",
+    "lint": "eslint .",
     "start": "NODE_ENV=production node server/index.js"
   },
   "dependencies": {
     "express": "^4.17.1",
     "formik": "^2.1.4",
-    "isomorphic-unfetch": "^3.0.0",
     "next": "9.3.0",
     "react": "16.13.0",
     "react-dom": "16.13.0",
@@ -19,6 +19,11 @@
     "uuid": "^7.0.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.19.0",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1"
   }
 }
