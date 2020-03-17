@@ -24,18 +24,44 @@ const sendGameUpdateToClients = gameId => {
 io.on('connection', socket => {
   // When a user want to join a game
   socket.on('game.join', ({ gameName, playerName }) => {
-    // TODO: limit game creation to avoid to overload the server
-    let game = FakeDB.findGameByName(gameName) || Game.create(gameName);
-    // Add player to the game
-    const player = Player.create(playerName);
-    game = Game.addPlayer(game, player);
-    // Save
-    FakeDB.saveGame(game);
-    // Subscribe to game channel
-    socket.join(game.id);
-    // Send player id to user
-    socket.emit('game.you', player.id);
-    sendGameUpdateToClients(game.id);
+    // Get game
+    let game = FakeDB.findGameByName(gameName);
+
+    if (game) {
+      // Want to join existing game
+      // Get player if exist
+      let player = Game.getPlayerByName(game, playerName);
+      // After game isReady, no new player can join in
+      if (game.isReady && !player) {
+        socket.emit('errorMessage', 'Game already started.');
+        return;
+      }
+      if (!player) {
+        // Add player to the game
+        player = Player.create(playerName);
+        game = Game.addPlayer(game, player);
+        // Save
+        FakeDB.saveGame(game);
+      }
+      // Subscribe to game channel
+      socket.join(game.id);
+      // Send player id to user
+      socket.emit('game.you', player.id);
+      sendGameUpdateToClients(game.id);
+    } else {
+      // Can create a game
+      game = Game.create(gameName);
+      // Add player to the game
+      const player = Player.create(playerName);
+      game = Game.addPlayer(game, player);
+      // Save
+      FakeDB.saveGame(game);
+      // Subscribe to game channel
+      socket.join(game.id);
+      // Send player id to user
+      socket.emit('game.you', player.id);
+      sendGameUpdateToClients(game.id);
+    }
   });
 
   // When a user set itself as ready
