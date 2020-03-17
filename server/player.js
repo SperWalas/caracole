@@ -13,7 +13,7 @@ const addCard = (player, cardToAdd) => {
   const newCards =
     emptyCardSpot === -1
       ? [...cards, cardToAdd]
-      : Object.assign([], cards, { emptyCardSpot: cardToAdd });
+      : cards.map((card, idx) => (idx === emptyCardSpot ? cardToAdd : card));
 
   return {
     ...player,

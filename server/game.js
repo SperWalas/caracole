@@ -130,7 +130,7 @@ const givePlayerCard = (game, playerId, card) => {
     nextActions: oldActions.slice(1),
     players: {
       ...players,
-      [playerToAddACard.id]: Player.addCard(playerToRemoveACard, cardToGive),
+      [playerToAddACard.id]: Player.addCard(playerToAddACard, cardToGive),
       [playerToRemoveACard.id]: Player.removeCard(playerToRemoveACard, card)
     }
   };
