@@ -3,6 +3,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const next = require('next');
 
+const { NBR_MAX_SIMULTANEOUS_GAMES } = require('./constants');
 const FakeDB = require('./fakeDB');
 const Game = require('./game');
 const Player = require('./player');
@@ -49,6 +50,14 @@ io.on('connection', socket => {
       socket.emit('game.you', player.id);
       sendGameUpdateToClients(game.id);
     } else {
+      // Want to create
+      const games = FakeDB.getGames();
+      const gamesCount = Object.keys(games).length;
+      // Avoid too many game
+      if (gamesCount >= NBR_MAX_SIMULTANEOUS_GAMES) {
+        socket.emit('errorMessage', 'Too many games created.');
+        return;
+      }
       // Can create a game
       game = Game.create(gameName);
       // Add player to the game
