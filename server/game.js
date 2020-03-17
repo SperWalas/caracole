@@ -108,11 +108,7 @@ const isCardCanBeThrown = (game, card) => {
 const isDone = game => {
   const { players: playersCollection } = game;
   const players = Object.values(playersCollection);
-  console.log({ players });
-  return players.find(p => {
-    console.log({ p });
-    return Player.isDone(p);
-  });
+  return players.find(Player.isDone);
 };
 
 const givePlayerCard = (game, playerId, card) => {
@@ -214,20 +210,37 @@ const setCardToDiscardPile = (game, playerId, card) => {
 };
 
 const setTmpCardToDiscardPile = (game, playerId) => {
-  console.log('setTmpCardToDiscardPile', { playerId });
+  console.log('setTmpCardToDiscardPile', {
+    playerId
+  });
   const { discardPile, nextActions: oldActions, players } = game;
   // Get player tmp card
   let player = players[playerId];
   const { tmpCard } = player;
+  let nextActions = [];
+
+  // Define action if the card is special
+  // TODO: The order of Q matter? (if multiple player put a Q)
+  if (tmpCard.value === 'Q') {
+    nextActions = [{ playerId, action: 'watch' }];
+  }
+  if (tmpCard.value === 'Joker') {
+    // TODO: Create action to swipe a card
+    // nextActions = [{ playerId, action: 'swap' }, ...nextActions, ];
+  }
+  if (tmpCard.value === 'J') {
+    // TODO: Create action to swipe a card
+    // nextActions = [{ playerId, action: 'exchange' }, ...nextActions, ];
+  }
 
   // Find next action
   const nextPlayer = Players.getNext(players, player);
-  const nextAction = { playerId: nextPlayer.id, action: 'pick' };
+  nextActions = [...nextActions, { playerId: nextPlayer.id, action: 'pick' }];
 
   return {
     ...game,
     discardPile: [...discardPile, tmpCard],
-    nextActions: [nextAction, ...oldActions.slice(1)],
+    nextActions: [...nextActions, ...oldActions.slice(1)],
     players: {
       ...players,
       [player.id]: Player.setTmpCard(player, null)
@@ -235,32 +248,45 @@ const setTmpCardToDiscardPile = (game, playerId) => {
   };
 };
 
-const setPlayerHasWatched = (game, playerId) => {
-  console.log('setPlayerHasWatched', { playerId });
-  const { players, nextActions: oldActions } = game;
-  let player = players[playerId];
+const setPlayerHasDiscoveredHisCards = (game, playerId) => {
+  let { players } = game;
   let nextActions = [];
+  let player = players[playerId];
+  // Update the player
+  player = Player.setHasDiscoveredHisCards(player);
+  // Update all players
+  players = {
+    ...players,
+    [playerId]: Player.setHasDiscoveredHisCards(player)
+  };
+  // Check if game should start
+  const shouldStart = Players.hasAllDiscoveredHisCards(players);
 
-  // Set player is not looking a card anymore
-  player = Player.setIsWatching(player, null);
-
-  // If game is sill in discovery phase, save that user watched his cards
-  // and find which player is the next to watch a card
-  if (!game.isStarted) {
-    // Set player has seen one of his cards
-    player = Player.incrementNbrCardsDiscovered(player);
-    // Find next action to play
-    if (player.nbrCardsDiscovered < NBR_CARDS_TO_DISCOVER) {
-      nextActions = [{ playerId, action: 'watch' }]; // Should watch again
-    } else {
-      const nextPlayer = Players.getNext(players, player);
-      nextActions = [{ playerId: nextPlayer.id, action: 'watch' }]; // Next player to watch
-    }
+  // Find next to play once the
+  if (shouldStart) {
+    const dealer = Players.getDealer(players);
+    const nextPlayer = Players.getNext(players, dealer);
+    nextActions = [{ playerId: nextPlayer.id, action: 'pick' }];
   }
 
   return {
     ...game,
-    nextActions: [...oldActions.slice(1), ...nextActions], // Remove last action, push more if necessary
+    isStarted: shouldStart,
+    nextActions,
+    players
+  };
+};
+
+const setPlayerHasWatched = (game, playerId) => {
+  console.log('setPlayerHasWatched', { playerId });
+  const { players, nextActions: oldActions } = game;
+  // Set player is not looking a card anymore
+  let player = players[playerId];
+  player = Player.setIsWatching(player, null);
+
+  return {
+    ...game,
+    nextActions: [...oldActions.slice(1)], // Remove last action, push more if necessary
     players: {
       ...players,
       [playerId]: player
@@ -301,9 +327,6 @@ const setup = game => {
 
   // Set dealer
   const playersCollectionWithDealer = Players.setDealer(playersCollection);
-  const dealer = Players.getDealer(playersCollectionWithDealer);
-  // Find the first player to play
-  const nextPlayer = Players.getNext(playersCollectionWithDealer, dealer);
 
   // Generate cards
   const nbrOfPlayers = Players.getCount(playersCollection);
@@ -331,27 +354,7 @@ const setup = game => {
     drawPile,
     isReady: true,
     isStarted: false,
-    nextActions: [{ playerId: nextPlayer.id, action: 'watch' }],
     players: playersCollectionWithCards
-  };
-};
-
-const start = game => {
-  // Update next plays
-  const { players: playersCollection } = game;
-  const dealer = Players.getDealer(playersCollection);
-  const nextPlayer = Players.getNext(playersCollection, dealer);
-  // const nextSecondPlayer = Players.getNext(playersCollection, nextPlayer);
-
-  return {
-    ...game,
-    nextActions: [
-      { playerId: nextPlayer.id, action: 'pick' }
-      // Here always put a second play in order to
-      // remember the next to play after drops of J,Q or Joker
-      //  { playerId: nextSecondPlayer.id, action: 'pick' }
-    ],
-    isStarted: true
   };
 };
 
@@ -369,11 +372,11 @@ module.exports = {
   removeDiscardCard,
   removeDrawCard,
   setCardToDiscardPile,
+  setPlayerHasDiscoveredHisCards,
   setPlayerHasWatched,
   setPlayerIsReady,
   setPlayerIsWatching,
   setPlayerTmpCard,
   setTmpCardToDiscardPile,
-  setup,
-  start
+  setup
 };

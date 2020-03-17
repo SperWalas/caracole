@@ -72,6 +72,17 @@ io.on('connection', socket => {
     }
   });
 
+  // When a user saw his cards at the begin of the game
+  socket.on('game.setPlayerhasDiscoveredHisCards', ({ gameId, playerId }) => {
+    let game = FakeDB.getGame(gameId);
+    // Update player, if all players have seen their cards, start the game
+    game = Game.setPlayerHasDiscoveredHisCards(game, playerId);
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients that player is looking to a card
+    sendGameUpdateToClients(gameId);
+  });
+
   // When a user set itself as ready
   socket.on('game.setPlayerReady', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
@@ -85,47 +96,11 @@ io.on('connection', socket => {
     sendGameUpdateToClients(gameId);
   });
 
-  // When a user set itself as ready
-  socket.on('game.watchCard', ({ gameId, playerId, card }) => {
-    let game = FakeDB.getGame(gameId);
-    // Get the card to discover
-    const cardToDiscover = Game.getCard(game, card);
-
-    // TODO: refactor the duplication
-    // Start of the game when people discover their own card
-    if (!game.isStarted) {
-      // At the beginning of the game, player can only see their own cards
-      if (playerId === card.playerId) {
-        // Update player
-        game = Game.setPlayerIsWatching(game, playerId, card);
-        // Save
-        FakeDB.saveGame(game);
-        // Respond to clients that player is looking to a card
-        sendGameUpdateToClients(gameId);
-        // Send card only to client
-        socket.emit('game.discoveredCard', cardToDiscover);
-      }
-    } else {
-      // Update player
-      game = Game.setPlayerIsWatching(game, playerId, card);
-      // Save
-      FakeDB.saveGame(game);
-      // Respond to clients
-      sendGameUpdateToClients(gameId);
-      // Send card only to client
-      socket.emit('game.discoveredCard', cardToDiscover);
-    }
-  });
-
   // When an user confirm he has seen the card
   socket.on('game.hasWatchedCard', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
     // Set has discover if game is still in discovery mode (beginning of the game)
     game = Game.setPlayerHasWatched(game, playerId);
-    // If all players have seen there cards, start the game
-    if (Players.areAllDiscoveredHisCards(game.players)) {
-      game = Game.start(game);
-    }
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
@@ -133,6 +108,7 @@ io.on('connection', socket => {
   });
 
   socket.on('game.pickDrawCard', ({ gameId, playerId }) => {
+    console.log('game.pickDrawCard', { gameId, playerId });
     let game = FakeDB.getGame(gameId);
     const [card] = game.drawPile;
     game = Game.removeDrawCard(game);
@@ -146,6 +122,7 @@ io.on('connection', socket => {
   });
 
   socket.on('game.pickDiscardCard', ({ gameId, playerId }) => {
+    console.log('game.pickDiscardCard', { gameId, playerId });
     let game = FakeDB.getGame(gameId);
     const [card] = game.discardPile.slice(-1);
     game = Game.removeDiscardCard(game);
