@@ -46,6 +46,11 @@ const distributeCards = (playersCollection, cardsToDistribute) => {
 
 const getCount = playersCollection => Object.keys(playersCollection).length;
 
+const getByName = (playersCollection, name) => {
+  const players = Object.values(playersCollection);
+  return players.find(p => p.name === name);
+};
+
 const getDealer = playersCollection => {
   const players = Object.values(playersCollection);
   return players.find(p => p.isDealer);
@@ -111,6 +116,7 @@ module.exports = {
   areAllReady,
   calcScores,
   distributeCards,
+  getByName,
   getCount,
   getDealer,
   getNext,

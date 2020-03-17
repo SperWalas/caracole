@@ -1,3 +1,4 @@
 module.exports = {
-  NBR_CARDS_TO_DISCOVER: 1 // 2
+  NBR_CARDS_TO_DISCOVER: 1, // 2
+  NBR_MAX_SIMULTANEOUS_GAMES: 3
 };

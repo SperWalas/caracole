@@ -87,6 +87,11 @@ const end = game => {
   };
 };
 
+const getPlayerByName = (game, playerName) => {
+  const { players } = game;
+  return Players.getByName(players, playerName);
+};
+
 const getCard = (game, card) => {
   // Get the card to throw
   const { players } = game;
@@ -367,6 +372,7 @@ module.exports = {
   create,
   end,
   getCard,
+  getPlayerByName,
   givePlayerCard,
   isCardCanBeThrown,
   isDone,
