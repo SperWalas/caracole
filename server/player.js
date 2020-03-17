@@ -41,11 +41,6 @@ const incrementNbrCardsDiscovered = player => ({
   nbrCardsDiscovered: player.nbrCardsDiscovered + 1
 });
 
-const mask = player => ({
-  ...player,
-  cards: player.cards.map(card => !!card)
-});
-
 const removeCard = (player, card) => ({
   ...player,
   cards: player.cards.map((c, idx) => (idx !== card.index ? c : null))
@@ -86,7 +81,6 @@ module.exports = {
   create,
   incrementNbrCardsDiscovered,
   isDone,
-  mask,
   removeCard,
   replaceCard,
   setIsReady,

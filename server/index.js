@@ -17,8 +17,7 @@ const nextHandler = nextApp.getRequestHandler();
 const sendGameUpdateToClients = gameId => {
   // Tell everyone a new player comes in
   const game = FakeDB.getGame(gameId);
-  const response = Game.mask(game);
-  io.to(gameId).emit('game.update', response);
+  io.to(gameId).emit('game.update', game);
 };
 
 // socket.io server

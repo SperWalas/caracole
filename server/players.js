@@ -69,16 +69,6 @@ const getRandom = playersCollection => {
   return players[idx];
 };
 
-const mask = playersCollection => {
-  return Object.keys(playersCollection).reduce((maskedPlayers, id) => {
-    const player = playersCollection[id];
-    return {
-      ...maskedPlayers,
-      [player.id]: Player.mask(player)
-    };
-  }, {});
-};
-
 const setAllIsReady = (playersCollection, isReady = true) => {
   const players = Object.values(playersCollection);
   return players.reduce(
@@ -121,7 +111,6 @@ module.exports = {
   getDealer,
   getNext,
   getRandom,
-  mask,
   setAllIsReady,
   setDealer
 };

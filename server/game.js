@@ -115,16 +115,6 @@ const isDone = game => {
   });
 };
 
-const mask = game => {
-  const { discardPile, players } = game;
-  return {
-    ...game,
-    discardPile: discardPile && discardPile.slice(-1),
-    drawPile: null,
-    players: Players.mask(players)
-  };
-};
-
 const givePlayerCard = (game, playerId, card) => {
   console.log('givePlayerCard', { playerId, card });
   const { nextActions: oldActions, players } = game;
@@ -376,7 +366,6 @@ module.exports = {
   givePlayerCard,
   isCardCanBeThrown,
   isDone,
-  mask,
   removeDiscardCard,
   removeDrawCard,
   setCardToDiscardPile,
