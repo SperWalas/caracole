@@ -1,4 +1,3 @@
-const { NBR_CARDS_TO_DISCOVER } = require('./constants');
 const Player = require('./player');
 
 // Create a players object
@@ -9,11 +8,6 @@ const add = (playersCollection, newPlayer) => ({
     order: Object.keys(playersCollection).length // Define plays order
   }
 });
-
-const areAllDiscoveredHisCards = playersCollection => {
-  const players = Object.values(playersCollection);
-  return players.every(p => p.nbrCardsDiscovered === NBR_CARDS_TO_DISCOVER);
-};
 
 const areAllReady = playersCollection => {
   const players = Object.values(playersCollection);
@@ -65,18 +59,12 @@ const getNext = (playersCollection, playerBefore) => {
 const getRandom = playersCollection => {
   const players = Object.values(playersCollection);
   const idx = Math.floor(Math.random() * players.length);
-  console.log({ idx });
   return players[idx];
 };
 
-const mask = playersCollection => {
-  return Object.keys(playersCollection).reduce((maskedPlayers, id) => {
-    const player = playersCollection[id];
-    return {
-      ...maskedPlayers,
-      [player.id]: Player.mask(player)
-    };
-  }, {});
+const hasAllDiscoveredHisCards = playersCollection => {
+  const players = Object.values(playersCollection);
+  return players.every(p => p.hasDiscoveredHisCards);
 };
 
 const setAllIsReady = (playersCollection, isReady = true) => {
@@ -112,7 +100,6 @@ const setDealer = playersCollection => {
 
 module.exports = {
   add,
-  areAllDiscoveredHisCards,
   areAllReady,
   calcScores,
   distributeCards,
@@ -121,7 +108,7 @@ module.exports = {
   getDealer,
   getNext,
   getRandom,
-  mask,
+  hasAllDiscoveredHisCards,
   setAllIsReady,
   setDealer
 };

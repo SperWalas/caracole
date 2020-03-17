@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import useSocket from '../../hooks/useSocket';
 
 const Game = ({ game, playerId }) => {
+  // TODO: reset this when game reset
+  const [nbrCardsDiscover, setNbrCardsDiscover] = useState(0);
   const [tmpCard, setTmpCard] = useState(null);
   const { discardPile, id: gameId, name, nextActions, players, isStarted } = game;
 
@@ -13,12 +15,6 @@ const Game = ({ game, playerId }) => {
   const socket = useSocket('game.pickedCard', card => {
     console.log('pickedCard', { card });
     setTmpCard(card);
-  });
-
-  // Listen to message when user watch a card
-  useSocket('game.discoveredCard', card => {
-    confirm(`The card is ${card.value} of ${card.suit}`);
-    socket.emit('game.hasWatchedCard', { gameId, playerId });
   });
 
   const handleGiveCard = (cardIndex, cardPlayerId) => {
@@ -53,26 +49,57 @@ const Game = ({ game, playerId }) => {
     setTmpCard(null);
   };
 
-  const handleWatchCard = (cardIndex, cardPlayerId) => {
+  const handleWatchCard = card => {
     console.log('handleWatchCard');
-    const card = { index: cardIndex, playerId: cardPlayerId };
-    socket.emit('game.watchCard', { gameId, playerId, card });
+    // TODO: Send to back that player is looking card
+    // if (isStarted) {
+    //   socket.emit('game.setPlayerhasDiscoveredHisCards', { gameId, playerId });
+    // }
+
+    confirm(`The card is ${card.value} of ${card.suit}`);
+
+    // Tell the world the player watcher
+    if (isStarted) {
+      socket.emit('game.hasWatchedCard', { gameId, playerId });
+    }
+
+    // Number of card to discover at the beginning
+    setNbrCardsDiscover(nbrCardsDiscover + 1);
+
+    if (nbrCardsDiscover === 1) {
+      socket.emit('game.setPlayerhasDiscoveredHisCards', { gameId, playerId });
+    }
   };
 
   const renderPlayerCard = ({ cards, id: cardPlayerId }) => {
+    const handleClickOnCard = (card, idx) => {
+      // Game hasn't start
+      if (!isStarted) {
+        // PLayer should one watch their own card
+        if (cardPlayerId === playerId && nbrCardsDiscover < 2) {
+          return handleWatchCard(card);
+        }
+        // Don't do anything
+        return;
+      }
+
+      // Game started it's player turn
+      if (isToPlayerToPlay) {
+        if (playerAction.action === 'watch') {
+          return handleWatchCard(card);
+        }
+        if (playerAction.action === 'give' && cardPlayerId === playerId) {
+          return handleGiveCard(idx, cardPlayerId);
+        }
+      }
+      // No action? the player want to throw the card then
+      return handleThrowHandCard(idx, cardPlayerId);
+    };
+
     return cards.map((card, idx) => (
       <div key={idx}>
         {card ? (
-          <button
-            key={idx}
-            onClick={() =>
-              !isStarted || (isToPlayerToPlay && playerAction.action === 'watch')
-                ? handleWatchCard(idx, cardPlayerId)
-                : cardPlayerId === playerId && isToPlayerToPlay && playerAction.action === 'give'
-                ? handleGiveCard(idx, cardPlayerId)
-                : handleThrowHandCard(idx, cardPlayerId)
-            }
-          >
+          <button key={idx} onClick={() => handleClickOnCard(card, idx)}>
             Card {idx}
           </button>
         ) : (
@@ -106,7 +133,11 @@ const Game = ({ game, playerId }) => {
         <div>
           <div>
             Last card :
-            {discardPile.length ? `${discardPile[0].value} of ${discardPile[0].suit}` : 'No card'}
+            {discardPile.length
+              ? `${discardPile[discardPile.length - 1].value} of ${
+                  discardPile[discardPile.length - 1].suit
+                }`
+              : 'No card'}
             {playerAction && playerAction.action === 'pick' && (
               <button onClick={handlePickDiscardCard}>Pick</button>
             )}

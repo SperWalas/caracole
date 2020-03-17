@@ -13,7 +13,7 @@ const addCard = (player, cardToAdd) => {
   const newCards =
     emptyCardSpot === -1
       ? [...cards, cardToAdd]
-      : Object.assign([], cards, { emptyCardSpot: cardToAdd });
+      : cards.map((card, idx) => (idx === emptyCardSpot ? cardToAdd : card));
 
   return {
     ...player,
@@ -23,28 +23,18 @@ const addCard = (player, cardToAdd) => {
 
 const create = name => ({
   cards: [],
+  hasDiscoveredHisCards: false,
   id: uuidv4(),
   isDealer: false, // The player who distribute the cards
   isReady: false, // Is ready to start a game
   isWatching: null, // What card the user watching (useful in front) { playerId: String, cardIndex: number }
   name,
-  nbrCardsDiscovered: 0, // Number of card the player have seen at the beginning of a set
   order: 0, // The order the players play
   scores: [], // Score of each set,
   tmpCard: null // Card the player pick (discard or draw pile)
 });
 
 const isDone = player => player.cards.every(card => card === null);
-
-const incrementNbrCardsDiscovered = player => ({
-  ...player,
-  nbrCardsDiscovered: player.nbrCardsDiscovered + 1
-});
-
-const mask = player => ({
-  ...player,
-  cards: player.cards.map(card => !!card)
-});
 
 const removeCard = (player, card) => ({
   ...player,
@@ -59,6 +49,11 @@ const replaceCard = (player, cardToReplace) => {
     cards: cards.map((card, index) => (index === cardToReplace.index ? tmpCard : card))
   };
 };
+
+const setHasDiscoveredHisCards = player => ({
+  ...player,
+  hasDiscoveredHisCards: true
+});
 
 const setIsReady = (player, isReady = true) => ({
   ...player,
@@ -84,11 +79,10 @@ module.exports = {
   addCard,
   addCards,
   create,
-  incrementNbrCardsDiscovered,
   isDone,
-  mask,
   removeCard,
   replaceCard,
+  setHasDiscoveredHisCards,
   setIsReady,
   setIsWatching,
   setScore,
