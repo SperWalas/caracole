@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import useSocket from '../../hooks/useSocket';
-import Card from '../Card';
+import PlayingCard from '../PlayingCard';
 import { Row, Column } from '../layout';
 import { Subheading } from '../text';
 
@@ -132,13 +132,13 @@ const Game = ({ game, playerId }) => {
             {card && (
               <>
                 {isSelf && !!unfoldedCards[idx] ? (
-                  <Card
+                  <PlayingCard
                     key={idx}
                     card={unfoldedCards[idx]}
                     onClick={() => handleHideCard(idx, card)}
                   />
                 ) : (
-                  <Card key={idx} isHidden onClick={() => handleCardClick(idx, card)} />
+                  <PlayingCard key={idx} isHidden onClick={() => handleCardClick(idx, card)} />
                 )}
               </>
             )}
@@ -152,12 +152,12 @@ const Game = ({ game, playerId }) => {
     <Column spacing="s2">
       <Subheading>Discard Pile</Subheading>
       <Row>
-        <Card
+        <PlayingCard
           isHidden
           {...(playerAction && playerAction.action === 'pick' && { onClick: handlePickDrawCard })}
         />
         {discardPile.length && (
-          <Card
+          <PlayingCard
             card={discardPile[discardPile.length - 1]}
             {...(playerAction &&
               playerAction.action === 'pick' && { onClick: handlePickDiscardCard })}
@@ -171,7 +171,7 @@ const Game = ({ game, playerId }) => {
     tmpCard && (
       <Column spacing="s2">
         <Subheading>Picked card</Subheading>
-        <Card card={tmpCard} onClick={handleThrowTmpCard} />
+        <PlayingCard card={tmpCard} onClick={handleThrowTmpCard} />
       </Column>
     );
 

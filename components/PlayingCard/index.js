@@ -31,7 +31,7 @@ const StyledImg = styled.img`
     `};
 `;
 
-const Card = ({ card, isHidden, onClick }) => {
+const PlayingCard = ({ card, isHidden, onClick }) => {
   if (isHidden) {
     return <StyledImg onClick={onClick} src={`/cards/${DECK_COLOR}_back.svg`} />;
   }
@@ -43,4 +43,4 @@ const Card = ({ card, isHidden, onClick }) => {
   return <StyledImg onClick={onClick} src={`/cards/${cardId}.svg`} />;
 };
 
-export default Card;
+export default PlayingCard;
