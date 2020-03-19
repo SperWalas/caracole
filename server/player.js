@@ -7,13 +7,13 @@ const addCards = (player, cards) => ({
   cards
 });
 
-const addCard = (player, cardToAdd) => {
+const addCard = (player, cardToAdd, cardIndex) => {
   const { cards } = player;
-  const emptyCardSpot = cards.indexOf(null);
+  const cardSpot = typeof cardIndex !== 'undefined' ? cardIndex : cards.indexOf(null);
   const newCards =
-    emptyCardSpot === -1
+    cardSpot === -1
       ? [...cards, cardToAdd]
-      : cards.map((card, idx) => (idx === emptyCardSpot ? cardToAdd : card));
+      : cards.map((card, idx) => (idx === cardSpot ? cardToAdd : card));
 
   return {
     ...player,
