@@ -11,14 +11,18 @@
   "dependencies": {
     "express": "^4.17.1",
     "formik": "^2.1.4",
+    "lodash": "^4.17.15",
     "next": "9.3.0",
+    "polished": "^3.4.4",
     "react": "16.13.0",
     "react-dom": "16.13.0",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
+    "styled-components": "^5.0.1",
     "uuid": "^7.0.2"
   },
   "devDependencies": {
+    "babel-plugin-styled-components": "^1.10.7",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",

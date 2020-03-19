@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 
 import useSocket from '../../hooks/useSocket';
-import Card from '../Card';
+import PlayingCard from '../PlayingCard';
+import { Row, Column } from '../layout';
+import { Subheading } from '../text';
 
 const DISCOVERY_CARDS_COUNT = 2;
 
@@ -124,53 +126,53 @@ const Game = ({ game, playerId }) => {
     };
 
     return (
-      <div style={{ display: 'flex' }}>
+      <Row>
         {cards.map((card, idx) => (
           <div key={idx}>
             {card && (
               <>
                 {isSelf && !!unfoldedCards[idx] ? (
-                  <Card
+                  <PlayingCard
                     key={idx}
                     card={unfoldedCards[idx]}
                     onClick={() => handleHideCard(idx, card)}
                   />
                 ) : (
-                  <Card key={idx} isHidden onClick={() => handleCardClick(idx, card)} />
+                  <PlayingCard key={idx} isHidden onClick={() => handleCardClick(idx, card)} />
                 )}
               </>
             )}
           </div>
         ))}
-      </div>
+      </Row>
     );
   };
 
   const renderDiscardPile = () => (
-    <div>
-      <h3>Discard Pile</h3>
-      <div style={{ display: 'flex' }}>
-        <Card
+    <Column spacing="s2">
+      <Subheading>Discard Pile</Subheading>
+      <Row>
+        <PlayingCard
           isHidden
           {...(playerAction && playerAction.action === 'pick' && { onClick: handlePickDrawCard })}
         />
         {discardPile.length && (
-          <Card
+          <PlayingCard
             card={discardPile[discardPile.length - 1]}
             {...(playerAction &&
               playerAction.action === 'pick' && { onClick: handlePickDiscardCard })}
           />
         )}
-      </div>
-    </div>
+      </Row>
+    </Column>
   );
 
   const renderPickedCard = () =>
     tmpCard && (
-      <div style={{ marginLeft: '50px' }}>
-        <h3>Picked card</h3>
-        <Card card={tmpCard} onClick={handleThrowTmpCard} />
-      </div>
+      <Column spacing="s2">
+        <Subheading>Picked card</Subheading>
+        <PlayingCard card={tmpCard} onClick={handleThrowTmpCard} />
+      </Column>
     );
 
   return (
@@ -182,7 +184,7 @@ const Game = ({ game, playerId }) => {
       </p>
 
       <div>
-        <h2>Scores</h2>
+        <Subheading>Scores</Subheading>
         {Object.keys(players).map(pid => {
           const { name, scores } = players[pid];
           return (
@@ -194,19 +196,19 @@ const Game = ({ game, playerId }) => {
       </div>
 
       {isStarted && (
-        <div style={{ display: 'flex' }}>
+        <Row spacing="s5">
           {renderDiscardPile()}
           {renderPickedCard()}
-        </div>
+        </Row>
       )}
 
-      <div>
+      <Column spacing="s1">
         {Object.keys(players).map(pid => {
           const player = players[pid];
           const { name, isReady } = player;
           const isPlayer = pid === playerId;
           return (
-            <div key={`game${pid}`} style={{ marginTop: '10px' }}>
+            <div key={`game${pid}`}>
               <span>{isPlayer ? 'you' : name}</span>
               {!isReady
                 ? pid === playerId && <button onClick={handleSetPlayerReady}>Set as isReady</button>
@@ -215,7 +217,7 @@ const Game = ({ game, playerId }) => {
             </div>
           );
         })}
-      </div>
+      </Column>
     </div>
   );
 };
