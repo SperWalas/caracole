@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import useSocket from '../../hooks/useSocket';
 import PlayingCard from '../PlayingCard';
@@ -9,13 +9,14 @@ const DISCOVERY_CARDS_COUNT = 2;
 
 const Game = ({ game, playerId }) => {
   // Keep track of unfolded cards using their indexes
+  const [selectedCards, setSelectedCards] = useState({});
   const [unfoldedCards, setUnfoldedCards] = useState({});
   const [tmpCard, setTmpCard] = useState(null);
   const { discardPile, id: gameId, name, nextActions, players, isStarted } = game;
 
   const nextAction = nextActions.length && nextActions[0];
-  const isToPlayerToPlay = nextAction && nextAction.playerId === playerId;
-  const playerAction = isToPlayerToPlay ? nextAction : null;
+  const isSelfToPlay = nextAction && nextAction.playerId === playerId;
+  const selfPlayerAction = isSelfToPlay ? nextAction : null;
 
   // Number of cards currently unfolded
   const unfoldedCardsCount = Object.keys(unfoldedCards).filter(key => !!unfoldedCards[key]).length;
@@ -26,12 +27,46 @@ const Game = ({ game, playerId }) => {
     setTmpCard(card);
   });
 
+  useEffect(() => {
+    const cardPlayerIds = Object.keys(selectedCards);
+    if (cardPlayerIds.length === 2) {
+      const cards = cardPlayerIds.map(cardPlayerId => ({
+        index: selectedCards[cardPlayerId],
+        playerId: cardPlayerId
+      }));
+      socket.emit('game.swapCard', { gameId, cards });
+      // Reset selection
+      setSelectedCards({});
+    }
+  }, [selectedCards]);
+
   const revealCard = (cardIndex, card) => {
     setUnfoldedCards({ ...unfoldedCards, [cardIndex]: card });
   };
 
   const hideCard = cardIndex => {
     setUnfoldedCards({ ...unfoldedCards, [cardIndex]: null });
+  };
+
+  const selectCard = (cardIndex, cardPlayerId) => {
+    // Player can't select his cards for a joker action
+    if (selfPlayerAction.action === 'swap' && cardPlayerId === playerId) {
+      return;
+    }
+
+    // Player has already selected one card
+    if (Object.keys(selectedCards).length) {
+      // Should have a least one of the card that is yours
+      if (!selectedCards[playerId] && cardPlayerId !== playerId) {
+        return;
+      }
+    }
+
+    // Toggle the card if card exists, use playerId to avoid two card for the same player
+    setSelectedCards({
+      ...selectedCards,
+      [cardPlayerId]: selectedCards[cardPlayerId] ? null : cardIndex
+    });
   };
 
   const handleGiveCard = (cardIndex, cardPlayerId) => {
@@ -112,13 +147,16 @@ const Game = ({ game, playerId }) => {
       }
 
       // Game started it's player turn
-      if (isToPlayerToPlay) {
+      if (isSelfToPlay) {
         // Can only watch one card at a time
-        if (playerAction.action === 'watch' && !unfoldedCardsCount) {
+        if (selfPlayerAction.action === 'watch' && !unfoldedCardsCount) {
           return handleWatchCard(idx, card);
         }
-        if (playerAction.action === 'give' && cardPlayerId === playerId) {
+        if (selfPlayerAction.action === 'give' && cardPlayerId === playerId) {
           return handleGiveCard(idx, cardPlayerId);
+        }
+        if (selfPlayerAction.action === 'exchange' || selfPlayerAction.action === 'swap') {
+          return selectCard(idx, cardPlayerId, selfPlayerAction.action);
         }
       }
       // No action? the player want to throw the card then
@@ -138,7 +176,12 @@ const Game = ({ game, playerId }) => {
                     onClick={() => handleHideCard(idx, card)}
                   />
                 ) : (
-                  <PlayingCard key={idx} isHidden onClick={() => handleCardClick(idx, card)} />
+                  <PlayingCard
+                    key={idx}
+                    isSelected={selectedCards[cardPlayerId] === idx}
+                    isHidden
+                    onClick={() => handleCardClick(idx, card)}
+                  />
                 )}
               </>
             )}
@@ -154,13 +197,14 @@ const Game = ({ game, playerId }) => {
       <Row>
         <PlayingCard
           isHidden
-          {...(playerAction && playerAction.action === 'pick' && { onClick: handlePickDrawCard })}
+          {...(selfPlayerAction &&
+            selfPlayerAction.action === 'pick' && { onClick: handlePickDrawCard })}
         />
         {discardPile.length && (
           <PlayingCard
             card={discardPile[discardPile.length - 1]}
-            {...(playerAction &&
-              playerAction.action === 'pick' && { onClick: handlePickDiscardCard })}
+            {...(selfPlayerAction &&
+              selfPlayerAction.action === 'pick' && { onClick: handlePickDiscardCard })}
           />
         )}
       </Row>
@@ -206,12 +250,12 @@ const Game = ({ game, playerId }) => {
         {Object.keys(players).map(pid => {
           const player = players[pid];
           const { name, isReady } = player;
-          const isPlayer = pid === playerId;
+          const isSelf = pid === playerId;
           return (
             <div key={`game${pid}`}>
-              <span>{isPlayer ? 'you' : name}</span>
+              <span>{isSelf ? 'you' : name}</span>
               {!isReady
-                ? pid === playerId && <button onClick={handleSetPlayerReady}>Set as isReady</button>
+                ? isSelf && <button onClick={handleSetPlayerReady}>Set as isReady</button>
                 : ' is ready'}
               {renderPlayerCard(player)}
             </div>

@@ -1,6 +1,5 @@
 const uuidv4 = require('uuid').v4;
 
-const { NBR_CARDS_TO_DISCOVER } = require('./constants');
 const Cards = require('./cards');
 const Player = require('./player');
 const Players = require('./players');
@@ -184,12 +183,12 @@ const setCardToDiscardPile = (game, playerId, card) => {
     nextActions = [{ playerId, action: 'watch' }, ...nextActions];
   }
   if (cardToThrow.value === 'Joker') {
-    // TODO: Create action to swipe a card
-    // nextActions = [{ playerId, action: 'swap' }, ...nextActions, ];
+    // Create action to swipe a card
+    nextActions = [{ playerId, action: 'swap' }, ...nextActions];
   }
   if (cardToThrow.value === 'J') {
-    // TODO: Create action to swipe a card
-    // nextActions = [{ playerId, action: 'exchange' }, ...nextActions, ];
+    // Create action to swipe a card
+    nextActions = [{ playerId, action: 'exchange' }, ...nextActions];
   }
 
   // When player have to give a card to an other player
@@ -225,12 +224,12 @@ const setTmpCardToDiscardPile = (game, playerId) => {
     nextActions = [{ playerId, action: 'watch' }];
   }
   if (tmpCard.value === 'Joker') {
-    // TODO: Create action to swipe a card
-    // nextActions = [{ playerId, action: 'swap' }, ...nextActions, ];
+    // Create action to swipe a card
+    nextActions = [{ playerId, action: 'swap' }, ...nextActions];
   }
   if (tmpCard.value === 'J') {
-    // TODO: Create action to swipe a card
-    // nextActions = [{ playerId, action: 'exchange' }, ...nextActions, ];
+    // Create action to swipe a card
+    nextActions = [{ playerId, action: 'exchange' }, ...nextActions];
   }
 
   // Find next action
@@ -358,6 +357,26 @@ const setup = game => {
   };
 };
 
+const swapPlayersCards = (game, cards) => {
+  const { players, nextActions: oldActions } = game;
+
+  const [card1, card2] = cards;
+  const player1 = players[card1.playerId];
+  const player2 = players[card2.playerId];
+  const cardForPlayer1 = getCard(game, card2);
+  const cardForPlayer2 = getCard(game, card1);
+
+  return {
+    ...game,
+    nextActions: [...oldActions.slice(1)], // Remove last action, push more if necessary
+    players: {
+      ...players,
+      [player1.id]: Player.addCard(player1, cardForPlayer1, card1.index),
+      [player2.id]: Player.addCard(player2, cardForPlayer2, card2.index)
+    }
+  };
+};
+
 module.exports = {
   addCardToPlayer,
   addPlayer,
@@ -378,5 +397,6 @@ module.exports = {
   setPlayerIsWatching,
   setPlayerTmpCard,
   setTmpCardToDiscardPile,
-  setup
+  setup,
+  swapPlayersCards
 };

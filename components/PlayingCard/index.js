@@ -29,11 +29,23 @@ const StyledImg = styled.img`
         transform: translateY(-3px);
       }
     `};
+
+  ${props =>
+    props.isSelected &&
+    css`
+      box-shadow: 0 0 2px 2px ${theme.color.governorBay};
+
+      &:hover {
+        box-shadow: 0 0 2px 2px ${theme.color.governorBay}, 2px 8px 10px ${theme.color.shadow};
+      }
+    `};
 `;
 
-const PlayingCard = ({ card, isHidden, onClick }) => {
+const PlayingCard = ({ card, isHidden, isSelected, onClick }) => {
   if (isHidden) {
-    return <StyledImg onClick={onClick} src={`/cards/${DECK_COLOR}_back.svg`} />;
+    return (
+      <StyledImg isSelected={isSelected} onClick={onClick} src={`/cards/${DECK_COLOR}_back.svg`} />
+    );
   }
 
   const { value, suit } = card;

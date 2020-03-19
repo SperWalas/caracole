@@ -7,7 +7,6 @@ const { NBR_MAX_SIMULTANEOUS_GAMES } = require('./constants');
 const FakeDB = require('./fakeDB');
 const Game = require('./game');
 const Player = require('./player');
-const Players = require('./players');
 
 const port = parseInt(process.env.PORT, 10) || 3500;
 const dev = process.env.NODE_ENV !== 'production';
@@ -191,6 +190,17 @@ io.on('connection', socket => {
     let game = FakeDB.getGame(gameId);
     // Give card to someone (playerIdToGiveTo is in the nextActions of the game)
     game = Game.givePlayerCard(game, playerId, card);
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
+  });
+
+  socket.on('game.swapCard', ({ gameId, cards }) => {
+    console.log('swapCard', { cards });
+    let game = FakeDB.getGame(gameId);
+    // Give card to someone (playerIdToGiveTo is in the nextActions of the game)
+    game = Game.swapPlayersCards(game, cards);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
