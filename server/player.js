@@ -21,6 +21,11 @@ const addCard = (player, cardToAdd, cardIndex) => {
   };
 };
 
+const calcScores = (player, isFirstToFinish = false) => ({
+  ...player,
+  scores: [...player.scores, isFirstToFinish ? -5 : Cards.calcScore(player.cards)]
+});
+
 const create = name => ({
   cards: [],
   hasDiscoveredHisCards: false,
@@ -65,11 +70,6 @@ const setIsWatching = (player, card = null) => ({
   isWatching: card
 });
 
-const setScore = (player, isFirstToFinish = false) => ({
-  ...player,
-  scores: [...player.scores, isFirstToFinish ? -5 : Cards.calcScore(player.cards)]
-});
-
 const setTmpCard = (player, tmpCard) => ({
   ...player,
   tmpCard
@@ -78,6 +78,7 @@ const setTmpCard = (player, tmpCard) => ({
 module.exports = {
   addCard,
   addCards,
+  calcScores,
   create,
   isDone,
   removeCard,
@@ -85,6 +86,5 @@ module.exports = {
   setHasDiscoveredHisCards,
   setIsReady,
   setIsWatching,
-  setScore,
   setTmpCard
 };

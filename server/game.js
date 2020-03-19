@@ -67,11 +67,14 @@ const canStart = game => {
   return Players.areAllReady(playersCollection) && Players.getCount(playersCollection) > 1;
 };
 
-const end = game => {
+const end = (game, playerIdFirstToFinish) => {
   console.log('end');
   const { players: playersCollection } = game;
   // Calc scores
-  const playersCollectionWithScoresUpdated = Players.calcScores(playersCollection);
+  const playersCollectionWithScoresUpdated = Players.calcScores(
+    playersCollection,
+    playerIdFirstToFinish
+  );
   // Reset isReady status to false for all players
   const playersCollectionHasUnready = Players.setAllIsReady(
     playersCollectionWithScoresUpdated,

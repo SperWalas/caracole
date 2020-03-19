@@ -14,12 +14,12 @@ const areAllReady = playersCollection => {
   return players.every(p => p.isReady);
 };
 
-const calcScores = playersCollection => {
+const calcScores = (playersCollection, playerIdFirstToFinish) => {
   const players = Object.values(playersCollection);
   return players.reduce(
     (playersWithScoresUpdated, player) => ({
       ...playersWithScoresUpdated,
-      [player.id]: Player.calcScores(player)
+      [player.id]: Player.calcScores(player, playerIdFirstToFinish === player.id)
     }),
     {}
   );

@@ -167,7 +167,7 @@ io.on('connection', socket => {
     if (Game.isDone(game)) {
       // TODO: let people who has the same card to throw even if the game is over
       console.log('GAME IS OVER');
-      game = Game.end(game);
+      game = Game.end(game, playerId);
     }
 
     // Save
