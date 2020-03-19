@@ -16,7 +16,7 @@ const Game = ({ game, playerId }) => {
 
   const nextAction = nextActions.length && nextActions[0];
   const isSelfToPlay = nextAction && nextAction.playerId === playerId;
-  const selfPlayerAction = isSelfToPlay ? nextAction : null;
+  const selfAction = isSelfToPlay && nextAction ? nextAction.action : null;
 
   // Number of cards currently unfolded
   const unfoldedCardsCount = Object.keys(unfoldedCards).filter(key => !!unfoldedCards[key]).length;
@@ -50,7 +50,7 @@ const Game = ({ game, playerId }) => {
 
   const selectCard = (cardIndex, cardPlayerId) => {
     // Player can't select his cards for a joker action
-    if (selfPlayerAction.action === 'swap' && cardPlayerId === playerId) {
+    if (selfAction === 'swap' && cardPlayerId === playerId) {
       return;
     }
 
@@ -149,14 +149,14 @@ const Game = ({ game, playerId }) => {
       // Game started it's player turn
       if (isSelfToPlay) {
         // Can only watch one card at a time
-        if (selfPlayerAction.action === 'watch' && !unfoldedCardsCount) {
+        if (selfAction === 'watch' && !unfoldedCardsCount) {
           return handleWatchCard(idx, card);
         }
-        if (selfPlayerAction.action === 'give' && cardPlayerId === playerId) {
+        if (selfAction === 'give' && cardPlayerId === playerId) {
           return handleGiveCard(idx, cardPlayerId);
         }
-        if (selfPlayerAction.action === 'exchange' || selfPlayerAction.action === 'swap') {
-          return selectCard(idx, cardPlayerId, selfPlayerAction.action);
+        if (selfAction === 'exchange' || selfAction === 'swap') {
+          return selectCard(idx, cardPlayerId, selfAction);
         }
       }
       // No action? the player want to throw the card then
@@ -197,14 +197,12 @@ const Game = ({ game, playerId }) => {
       <Row>
         <PlayingCard
           isHidden
-          {...(selfPlayerAction &&
-            selfPlayerAction.action === 'pick' && { onClick: handlePickDrawCard })}
+          {...(selfAction === 'pick' && { onClick: handlePickDrawCard })}
         />
         {discardPile.length && (
           <PlayingCard
             card={discardPile[discardPile.length - 1]}
-            {...(selfPlayerAction &&
-              selfPlayerAction.action === 'pick' && { onClick: handlePickDiscardCard })}
+            {...(selfAction === 'pick' && { onClick: handlePickDiscardCard })}
           />
         )}
       </Row>
