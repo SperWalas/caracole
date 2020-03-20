@@ -114,7 +114,11 @@ const Game = ({ game, playerId }) => {
   };
 
   const handleSetPlayerReady = () => {
+    // Ready to start/reboot the game reset data
     socket.emit('game.setPlayerReady', { gameId, playerId });
+    setSelectedCards({});
+    setUnfoldedCards({});
+    setTmpCard(null);
   };
 
   const handlePickDrawCard = () => {

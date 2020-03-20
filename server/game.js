@@ -83,6 +83,7 @@ const end = (game, playerIdFirstToFinish) => {
 
   return {
     ...game,
+    isReady: false,
     isStarted: false,
     nextActions: [],
     players: playersCollectionHasUnready

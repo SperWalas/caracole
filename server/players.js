@@ -72,7 +72,12 @@ const setAllIsReady = (playersCollection, isReady = true) => {
   return players.reduce(
     (playersUpdated, player) => ({
       ...playersUpdated,
-      [player.id]: Player.setIsReady(player, isReady)
+      [player.id]: {
+        ...player,
+        // Reset has discover if the player is not ready
+        hasDiscoveredHisCards: !isReady ? false : player.hasDiscoveredHisCards,
+        isReady
+      }
     }),
     {}
   );
