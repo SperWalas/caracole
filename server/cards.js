@@ -12,7 +12,7 @@ const calcScore = cards => {
   return cards.reduce((score, card) => (card ? score + card.points : score), 0);
 };
 
-const getDeck = () => {
+const getDeck = (withJoker = true) => {
   const deck = new Array();
 
   for (let i = 0; i < suits.length; i++) {
@@ -30,8 +30,10 @@ const getDeck = () => {
       deck.push(card);
     }
   }
-  const joker = { value: 'Joker', suit: null, points: 10 };
-  deck.push(joker, joker);
+  if (withJoker) {
+    const joker = { value: 'Joker', suit: null, points: 10 };
+    deck.push(joker, joker);
+  }
 
   return deck;
 };
