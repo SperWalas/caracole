@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import io from 'socket.io-client';
 
-import useSocket from '../../hooks/useSocket';
 import { Row, Column } from '../layout';
 import { Subheading } from '../text';
 
@@ -8,6 +8,7 @@ import DiscardPile from './DiscardPile';
 import PickedCard from './PickedCard';
 import PlayerCards from './PlayerCards';
 
+const socket = io();
 const DISCOVERY_CARDS_COUNT = 2;
 
 const Game = ({ game, playerId }) => {
@@ -15,9 +16,9 @@ const Game = ({ game, playerId }) => {
   const [selectedCards, setSelectedCards] = useState({});
   // Unfolded cards: { [playerId]: { [cardIndex]: boolean }}
   const [unfoldedCards, setUnfoldedCards] = useState({});
-  const [tmpCard, setTmpCard] = useState(null);
   const { discardPile, id: gameId, name, nextActions, players, isStarted } = game;
 
+  const { tmpCard } = players[playerId];
   const nextAction = nextActions.length && nextActions[0];
   const isSelfToPlay = nextAction && nextAction.playerId === playerId;
   const selfAction = isSelfToPlay && nextAction ? nextAction.action : null;
@@ -26,12 +27,6 @@ const Game = ({ game, playerId }) => {
   const unfoldedCardsCount = Object.values(unfoldedCards).reduce((sum, cardIndexes) => {
     return sum + Object.values(cardIndexes).filter(val => !!val).length;
   }, 0);
-
-  // Listen to message when user pick from drawPile or discardPile
-  const socket = useSocket('game.pickedCard', card => {
-    console.log('pickedCard', { card });
-    setTmpCard(card);
-  });
 
   useEffect(() => {
     const cardPlayerIds = Object.keys(selectedCards);
@@ -118,7 +113,6 @@ const Game = ({ game, playerId }) => {
     socket.emit('game.setPlayerReady', { gameId, playerId });
     setSelectedCards({});
     setUnfoldedCards({});
-    setTmpCard(null);
   };
 
   const handlePickDrawCard = () => {
@@ -133,14 +127,12 @@ const Game = ({ game, playerId }) => {
 
   const handleThrowTmpCard = () => {
     socket.emit('game.throwTmpCard', { gameId, playerId });
-    setTmpCard(null);
   };
 
   const handleThrowHandCard = (cardIndex, cardPlayerId) => {
     console.log('handleThrowHandCard', { cardIndex, cardPlayerId });
     const card = { index: cardIndex, playerId: cardPlayerId };
     socket.emit('game.throwCard', { gameId, playerId, card });
-    setTmpCard(null);
   };
 
   const handleWatchCard = (cardIndex, cardPlayerId) => {
