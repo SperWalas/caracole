@@ -332,13 +332,14 @@ const setup = game => {
   const playersCollectionWithDealer = Players.setDealer(playersCollection);
 
   // Generate cards
+  const cards = Cards.getDeck(nbrOfPlayers > 2); // Joker only for 3+ players
   const nbrOfPlayers = Players.getCount(playersCollection);
   const nbrCardsPerPlayer = nbrOfPlayers > 5 ? 6 : 4;
   const nbrCardsForPlayers = nbrOfPlayers * nbrCardsPerPlayer;
   const deckOfCards =
     nbrOfPlayers > 5
-      ? Cards.getDeck().concat(Cards.getDeck()) // Two pack for +6 players
-      : Cards.getDeck();
+      ? cards.concat(cards) // Two pack for +6 players
+      : cards;
   const shuffledDeck = Cards.shuffleDeck(deckOfCards);
   const cardsForPlayers = shuffledDeck.slice(0, nbrCardsForPlayers);
   // First card to be discovered
