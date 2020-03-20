@@ -1,5 +1,6 @@
 import React from 'react';
 
+import CardSpot from '../../CardSpot';
 import { Column, Row } from '../../layout';
 import PlayingCard from '../../PlayingCard';
 import { Heading } from '../../text';
@@ -10,8 +11,10 @@ const DiscardPile = ({ discardPile, onDrawDiscarded, onDrawNew }) => {
       <Heading>Discard Pile</Heading>
       <Row spacing="s1_5">
         <PlayingCard isHidden onClick={onDrawNew} />
-        {discardPile && discardPile.length && (
+        {discardPile && discardPile.length ? (
           <PlayingCard card={discardPile[discardPile.length - 1]} onClick={onDrawDiscarded} />
+        ) : (
+          <CardSpot />
         )}
       </Row>
     </Column>

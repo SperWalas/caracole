@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 
 import { Row } from '../../layout';
+import CardSpot from '../../CardSpot';
 import PlayingCard from '../../PlayingCard';
 
 const PlayerCards = ({
@@ -27,8 +28,9 @@ const PlayerCards = ({
               />
             )}
           </Fragment>
-        ) : // TODO Render empty spot
-        null
+        ) : (
+          <CardSpot label="No Card" />
+        )
       )}
     </Row>
   );

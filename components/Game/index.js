@@ -16,7 +16,7 @@ const Game = ({ game, playerId }) => {
   const [selectedCards, setSelectedCards] = useState({});
   // Unfolded cards: { [playerId]: { [cardIndex]: boolean }}
   const [unfoldedCards, setUnfoldedCards] = useState({});
-  const { discardPile, id: gameId, name, nextActions, players, isStarted } = game;
+  const { discardPile, id: gameId, name, nextActions, players, isReady, isStarted } = game;
 
   const { tmpCard } = players[playerId];
   const nextAction = nextActions.length && nextActions[0];
@@ -209,16 +209,18 @@ const Game = ({ game, playerId }) => {
         })}
       </div>
 
-      <Row spacing="s8">
-        <DiscardPile
-          discardPile={isStarted ? discardPile : undefined}
-          {...(selfAction === 'pick' && {
-            onDrawDiscarded: handlePickDiscardCard,
-            onDrawNew: handlePickDrawCard
-          })}
-        />
-        <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
-      </Row>
+      {isReady && (
+        <Row spacing="s8">
+          <DiscardPile
+            discardPile={isStarted ? discardPile : undefined}
+            {...(selfAction === 'pick' && {
+              onDrawDiscarded: handlePickDiscardCard,
+              onDrawNew: handlePickDrawCard
+            })}
+          />
+          <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
+        </Row>
+      )}
 
       <Column spacing="s1">
         {Object.keys(players).map(pid => {
