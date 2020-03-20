@@ -20,12 +20,14 @@ const PlayerCards = ({
             {unfoldedCards[cardPlayerId] && unfoldedCards[cardPlayerId][cardIndex] ? (
               <PlayingCard card={card} onClick={() => onCardHide(cardIndex, cardPlayerId)} />
             ) : (
-              <PlayingCard
-                card={card}
-                isHidden
-                isSelected={selectedCards[cardPlayerId] === cardIndex}
-                onClick={() => onCardPick(cardIndex, cardPlayerId)}
-              />
+              // TEMP: keep cards visibile to ease debugging
+              <div style={{ opacity: 0.15 }}>
+                <PlayingCard
+                  card={card}
+                  isSelected={selectedCards[cardPlayerId] === cardIndex}
+                  onClick={() => onCardPick(cardIndex, cardPlayerId)}
+                />
+              </div>
             )}
           </Fragment>
         ) : (
