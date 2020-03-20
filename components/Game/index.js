@@ -75,7 +75,7 @@ const Game = ({ game, playerId }) => {
     // Player has already selected one card
     if (Object.keys(selectedCards).length) {
       // Should have a least one of the card that is yours
-      if (!selectedCards[playerId] && cardPlayerId !== playerId) {
+      if (nextAction === 'exchange' && !selectedCards[playerId] && cardPlayerId !== playerId) {
         return;
       }
     }
@@ -114,7 +114,11 @@ const Game = ({ game, playerId }) => {
   };
 
   const handleSetPlayerReady = () => {
+    // Ready to start/reboot the game reset data
     socket.emit('game.setPlayerReady', { gameId, playerId });
+    setSelectedCards({});
+    setUnfoldedCards({});
+    setTmpCard(null);
   };
 
   const handlePickDrawCard = () => {

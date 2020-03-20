@@ -167,7 +167,7 @@ io.on('connection', socket => {
     if (Game.isDone(game)) {
       // TODO: let people who has the same card to throw even if the game is over
       console.log('GAME IS OVER');
-      game = Game.end(game);
+      game = Game.end(game, playerId);
     }
 
     // Save
@@ -190,6 +190,12 @@ io.on('connection', socket => {
     let game = FakeDB.getGame(gameId);
     // Give card to someone (playerIdToGiveTo is in the nextActions of the game)
     game = Game.givePlayerCard(game, playerId, card);
+    // Check if game is done
+    if (Game.isDone(game)) {
+      // TODO: let people who has the same card to throw even if the game is over
+      console.log('GAME IS OVER');
+      game = Game.end(game, playerId);
+    }
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
