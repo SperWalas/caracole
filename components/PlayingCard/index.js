@@ -13,7 +13,6 @@ const SUIT_LETTER = {
 };
 
 const StyledImg = styled.img`
-  margin: ${theme.spacing.s1};
   width: ${theme.metric.cardWidth};
   height: auto;
   border-radius: 7px;

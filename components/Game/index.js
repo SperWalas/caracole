@@ -1,25 +1,31 @@
 import React, { useState, useEffect } from 'react';
 
 import useSocket from '../../hooks/useSocket';
-import PlayingCard from '../PlayingCard';
 import { Row, Column } from '../layout';
 import { Subheading } from '../text';
+
+import DiscardPile from './DiscardPile';
+import PickedCard from './PickedCard';
+import PlayerCards from './PlayerCards';
 
 const DISCOVERY_CARDS_COUNT = 2;
 
 const Game = ({ game, playerId }) => {
-  // Keep track of unfolded cards using their indexes
+  // Selected cards: { [playerId]: cardIndex }
   const [selectedCards, setSelectedCards] = useState({});
+  // Unfolded cards: { [playerId]: { [cardIndex]: boolean }}
   const [unfoldedCards, setUnfoldedCards] = useState({});
   const [tmpCard, setTmpCard] = useState(null);
   const { discardPile, id: gameId, name, nextActions, players, isStarted } = game;
 
   const nextAction = nextActions.length && nextActions[0];
   const isSelfToPlay = nextAction && nextAction.playerId === playerId;
-  const selfPlayerAction = isSelfToPlay ? nextAction : null;
+  const selfAction = isSelfToPlay && nextAction ? nextAction.action : null;
 
   // Number of cards currently unfolded
-  const unfoldedCardsCount = Object.keys(unfoldedCards).filter(key => !!unfoldedCards[key]).length;
+  const unfoldedCardsCount = Object.values(unfoldedCards).reduce((sum, cardIndexes) => {
+    return sum + Object.values(cardIndexes).filter(val => !!val).length;
+  }, 0);
 
   // Listen to message when user pick from drawPile or discardPile
   const socket = useSocket('game.pickedCard', card => {
@@ -40,17 +46,29 @@ const Game = ({ game, playerId }) => {
     }
   }, [selectedCards]);
 
-  const revealCard = (cardIndex, card) => {
-    setUnfoldedCards({ ...unfoldedCards, [cardIndex]: card });
+  const revealCard = (cardIndex, cardPlayerId) => {
+    setUnfoldedCards({
+      ...unfoldedCards,
+      [cardPlayerId]: {
+        ...unfoldedCards[cardPlayerId],
+        [cardIndex]: true
+      }
+    });
   };
 
-  const hideCard = cardIndex => {
-    setUnfoldedCards({ ...unfoldedCards, [cardIndex]: null });
+  const hideCard = (cardIndex, cardPlayerId) => {
+    setUnfoldedCards({
+      ...unfoldedCards,
+      [cardPlayerId]: {
+        ...unfoldedCards[cardPlayerId],
+        [cardIndex]: false
+      }
+    });
   };
 
   const selectCard = (cardIndex, cardPlayerId) => {
     // Player can't select his cards for a joker action
-    if (selfPlayerAction.action === 'swap' && cardPlayerId === playerId) {
+    if (selfAction === 'swap' && cardPlayerId === playerId) {
       return;
     }
 
@@ -75,7 +93,7 @@ const Game = ({ game, playerId }) => {
     socket.emit('game.giveCard', { gameId, playerId, card });
   };
 
-  const handleHideCard = (idx, card) => {
+  const handleHideCard = (cardIndex, cardPlayerId) => {
     console.log('handleHideCard');
 
     // Tell the world the card has been watched
@@ -87,12 +105,12 @@ const Game = ({ game, playerId }) => {
     if (
       !isStarted &&
       unfoldedCardsCount === 1 &&
-      Object.keys(unfoldedCards).length === DISCOVERY_CARDS_COUNT
+      Object.keys(unfoldedCards[playerId] || {}).length === DISCOVERY_CARDS_COUNT
     ) {
       socket.emit('game.setPlayerhasDiscoveredHisCards', { gameId, playerId });
     }
 
-    hideCard(idx, card);
+    hideCard(cardIndex, cardPlayerId);
   };
 
   const handleSetPlayerReady = () => {
@@ -121,7 +139,7 @@ const Game = ({ game, playerId }) => {
     setTmpCard(null);
   };
 
-  const handleWatchCard = (idx, card) => {
+  const handleWatchCard = (cardIndex, cardPlayerId) => {
     console.log('handleWatchCard');
 
     // TODO: Send to back that player is looking card
@@ -129,18 +147,18 @@ const Game = ({ game, playerId }) => {
     //   socket.emit('game.setPlayerhasDiscoveredHisCards', { gameId, playerId });
     // }
 
-    revealCard(idx, card);
+    revealCard(cardIndex, cardPlayerId);
   };
 
   const renderPlayerCard = ({ cards, id: cardPlayerId }) => {
     const isSelf = cardPlayerId === playerId;
 
-    const handleCardClick = (idx, card) => {
+    const handleCardClick = cardIndex => {
       // Game hasn't start
       if (!isStarted) {
         // Player can only watch their own cards
-        if (isSelf && Object.keys(unfoldedCards).length < DISCOVERY_CARDS_COUNT) {
-          return handleWatchCard(idx, card);
+        if (isSelf && Object.keys(unfoldedCards[playerId] || {}).length < DISCOVERY_CARDS_COUNT) {
+          return handleWatchCard(cardIndex, cardPlayerId);
         }
         // Don't do anything
         return;
@@ -149,75 +167,31 @@ const Game = ({ game, playerId }) => {
       // Game started it's player turn
       if (isSelfToPlay) {
         // Can only watch one card at a time
-        if (selfPlayerAction.action === 'watch' && !unfoldedCardsCount) {
-          return handleWatchCard(idx, card);
+        if (selfAction === 'watch' && !unfoldedCardsCount) {
+          return handleWatchCard(cardIndex, cardPlayerId);
         }
-        if (selfPlayerAction.action === 'give' && cardPlayerId === playerId) {
-          return handleGiveCard(idx, cardPlayerId);
+        if (selfAction === 'give' && cardPlayerId === playerId) {
+          return handleGiveCard(cardIndex, cardPlayerId);
         }
-        if (selfPlayerAction.action === 'exchange' || selfPlayerAction.action === 'swap') {
-          return selectCard(idx, cardPlayerId, selfPlayerAction.action);
+        if (selfAction === 'exchange' || selfAction === 'swap') {
+          return selectCard(cardIndex, cardPlayerId, selfAction);
         }
       }
       // No action? the player want to throw the card then
-      return handleThrowHandCard(idx, cardPlayerId);
+      return handleThrowHandCard(cardIndex, cardPlayerId);
     };
 
     return (
-      <Row>
-        {cards.map((card, idx) => (
-          <div key={idx}>
-            {card && (
-              <>
-                {isSelf && !!unfoldedCards[idx] ? (
-                  <PlayingCard
-                    key={idx}
-                    card={unfoldedCards[idx]}
-                    onClick={() => handleHideCard(idx, card)}
-                  />
-                ) : (
-                  <PlayingCard
-                    key={idx}
-                    isSelected={selectedCards[cardPlayerId] === idx}
-                    isHidden
-                    onClick={() => handleCardClick(idx, card)}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        ))}
-      </Row>
+      <PlayerCards
+        cardPlayerId={cardPlayerId}
+        cards={cards}
+        onCardHide={handleHideCard}
+        onCardPick={handleCardClick}
+        selectedCards={selectedCards}
+        unfoldedCards={unfoldedCards}
+      />
     );
   };
-
-  const renderDiscardPile = () => (
-    <Column spacing="s2">
-      <Subheading>Discard Pile</Subheading>
-      <Row>
-        <PlayingCard
-          isHidden
-          {...(selfPlayerAction &&
-            selfPlayerAction.action === 'pick' && { onClick: handlePickDrawCard })}
-        />
-        {discardPile.length && (
-          <PlayingCard
-            card={discardPile[discardPile.length - 1]}
-            {...(selfPlayerAction &&
-              selfPlayerAction.action === 'pick' && { onClick: handlePickDiscardCard })}
-          />
-        )}
-      </Row>
-    </Column>
-  );
-
-  const renderPickedCard = () =>
-    tmpCard && (
-      <Column spacing="s2">
-        <Subheading>Picked card</Subheading>
-        <PlayingCard card={tmpCard} onClick={handleThrowTmpCard} />
-      </Column>
-    );
 
   return (
     <div>
@@ -239,12 +213,16 @@ const Game = ({ game, playerId }) => {
         })}
       </div>
 
-      {isStarted && (
-        <Row spacing="s5">
-          {renderDiscardPile()}
-          {renderPickedCard()}
-        </Row>
-      )}
+      <Row spacing="s8">
+        <DiscardPile
+          discardPile={isStarted ? discardPile : undefined}
+          {...(selfAction === 'pick' && {
+            onDrawDiscarded: handlePickDiscardCard,
+            onDrawNew: handlePickDrawCard
+          })}
+        />
+        <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
+      </Row>
 
       <Column spacing="s1">
         {Object.keys(players).map(pid => {
