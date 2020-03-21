@@ -40,18 +40,16 @@ const StyledImg = styled.img`
     `};
 `;
 
-const PlayingCard = ({ card, isHidden, isSelected, onClick }) => {
+const PlayingCard = ({ card, isHidden, ...rest }) => {
   if (isHidden) {
-    return (
-      <StyledImg isSelected={isSelected} onClick={onClick} src={`/cards/${DECK_COLOR}_back.svg`} />
-    );
+    return <StyledImg {...rest} src={`/cards/${DECK_COLOR}_back.svg`} />;
   }
 
   const { value, suit } = card;
   const suitLetter = SUIT_LETTER[suit];
   const cardId = value === 'Joker' ? 'joker' : `${value}${suitLetter}`;
 
-  return <StyledImg onClick={onClick} src={`/cards/${cardId}.svg`} />;
+  return <StyledImg {...rest} src={`/cards/${cardId}.svg`} />;
 };
 
 export default PlayingCard;

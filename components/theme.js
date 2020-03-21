@@ -15,21 +15,6 @@ export const color = {
   monza: '#e60c0c' // Red
 };
 
-export const colorForBrand = {
-  primary: color.governorBay,
-  primaryHover: darken(0.05, color.governorBay),
-  primaryActive: darken(0.1, color.governorBay),
-  primaryBackground: tint(0.85, color.governorBay),
-
-  text: color.codGray,
-  textDisabled: color.silver,
-  textHighlighted: color.governorBay,
-  textSubdued: color.dustyGray,
-
-  border: color.mercury,
-  shadow: rgba(color.black, 0.1)
-};
-
 export const colorForStatus = {
   danger: color.monza,
   disabled: color.dustyGray,
@@ -45,7 +30,22 @@ const theme = {
   },
   color: {
     ...color,
-    ...colorForBrand
+
+    primary: color.governorBay,
+    primaryHover: darken(0.05, color.governorBay),
+    primaryActive: darken(0.1, color.governorBay),
+    primaryBackground: tint(0.85, color.governorBay),
+
+    background: color.white,
+    backgroundAccented: color.alabaster,
+
+    text: color.codGray,
+    textDisabled: color.silver,
+    textHighlighted: color.governorBay,
+    textSubdued: color.dustyGray,
+
+    border: color.mercury,
+    shadow: rgba(color.black, 0.1)
   },
   fontSize: {
     small: rem('11px'),

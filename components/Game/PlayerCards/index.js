@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 
 import { Row } from '../../layout';
+import CardSpot from '../../CardSpot';
 import PlayingCard from '../../PlayingCard';
 
 const PlayerCards = ({
@@ -19,16 +20,19 @@ const PlayerCards = ({
             {unfoldedCards[cardPlayerId] && unfoldedCards[cardPlayerId][cardIndex] ? (
               <PlayingCard card={card} onClick={() => onCardHide(cardIndex, cardPlayerId)} />
             ) : (
-              <PlayingCard
-                card={card}
-                isHidden
-                isSelected={selectedCards[cardPlayerId] === cardIndex}
-                onClick={() => onCardPick(cardIndex, cardPlayerId)}
-              />
+              // TEMP: keep cards visibile to ease debugging
+              <div style={{ opacity: 0.15 }}>
+                <PlayingCard
+                  card={card}
+                  isSelected={selectedCards[cardPlayerId] === cardIndex}
+                  onClick={() => onCardPick(cardIndex, cardPlayerId)}
+                />
+              </div>
             )}
           </Fragment>
-        ) : // TODO Render empty spot
-        null
+        ) : (
+          <CardSpot label="No Card" />
+        )
       )}
     </Row>
   );
