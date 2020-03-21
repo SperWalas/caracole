@@ -1,6 +1,13 @@
-import App from 'next/app';
 import React from 'react';
+import App from 'next/app';
+import { normalize } from 'polished';
 import io from 'socket.io-client';
+import { createGlobalStyle } from 'styled-components';
+
+// Override global style to avoid Story height to be 100% of the screen height
+const GlobalStyle = createGlobalStyle`
+  ${normalize()};
+`;
 
 class MyApp extends App {
   constructor() {
@@ -33,7 +40,12 @@ class MyApp extends App {
 
   render() {
     const { Component, pageProps } = this.props;
-    return <Component {...pageProps} socket={this.state.socket} />;
+    return (
+      <>
+        <GlobalStyle />
+        <Component {...pageProps} socket={this.state.socket} />
+      </>
+    );
   }
 }
 
