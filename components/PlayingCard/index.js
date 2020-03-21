@@ -15,7 +15,7 @@ const SUIT_LETTER = {
 const StyledImg = styled.img`
   width: ${theme.metric.cardWidth};
   height: auto;
-  border-radius: 7px;
+  border-radius: ${theme.metric.borderRadius};
 
   ${props =>
     props.onClick &&

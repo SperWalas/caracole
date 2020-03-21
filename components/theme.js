@@ -8,6 +8,7 @@ export const color = {
   dustyGray: '#969696',
   silver: '#c8c8c8',
   mercury: '#e1e1e1',
+  white: '#fff',
 
   governorBay: '#3a50c0', // Blue
   emerald: '#00C241', // Green
@@ -57,7 +58,7 @@ const theme = {
   },
   fontWeight: {
     normal: 400,
-    medium: 500
+    medium: 600
   },
   lineHeight: {
     small: rem('16px'),
@@ -69,7 +70,7 @@ const theme = {
   },
   metric: {
     borderRadius: rem('3px'),
-    cardWidth: rem('80px'),
+    cardWidth: rem('90px'),
 
     smallContainer: rem('400px'),
     mediumContainer: rem('600px'),
