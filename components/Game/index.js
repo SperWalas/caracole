@@ -16,9 +16,19 @@ const Game = ({ game, playerId }) => {
   const [selectedCards, setSelectedCards] = useState({});
   // Unfolded cards: { [playerId]: { [cardIndex]: boolean }}
   const [unfoldedCards, setUnfoldedCards] = useState({});
-  const { discardPile, id: gameId, name, nextActions, players, isReady, isStarted } = game;
+  const {
+    cardBeenWatched,
+    discardPile,
+    id: gameId,
+    name,
+    nextActions,
+    players,
+    isReady,
+    isStarted
+  } = game;
 
   const { tmpCard } = players[playerId];
+
   const nextAction = nextActions.length && nextActions[0];
   const isSelfToPlay = nextAction && nextAction.playerId === playerId;
   const selfAction = isSelfToPlay && nextAction ? nextAction.action : null;
@@ -102,7 +112,7 @@ const Game = ({ game, playerId }) => {
       unfoldedCardsCount === 1 &&
       Object.keys(unfoldedCards[playerId] || {}).length === DISCOVERY_CARDS_COUNT
     ) {
-      socket.emit('game.setPlayerhasDiscoveredHisCards', { gameId, playerId });
+      socket.emit('game.hasDiscoveredHisCards', { gameId, playerId });
     }
 
     hideCard(cardIndex, cardPlayerId);
@@ -138,15 +148,20 @@ const Game = ({ game, playerId }) => {
   const handleWatchCard = (cardIndex, cardPlayerId) => {
     console.log('handleWatchCard');
 
-    // TODO: Send to back that player is looking card
-    // if (isStarted) {
-    //   socket.emit('game.setPlayerhasDiscoveredHisCards', { gameId, playerId });
-    // }
+    // Send to back that player is looking a card
+    if (isStarted) {
+      socket.emit('game.watchCard', {
+        gameId,
+        playerId,
+        card: { index: cardIndex, cardPlayerId }
+      });
+    }
 
     revealCard(cardIndex, cardPlayerId);
   };
 
   const renderPlayerCard = ({ cards, id: cardPlayerId }) => {
+    console.log('renderPlayerCard', { cardBeenWatched });
     const isSelf = cardPlayerId === playerId;
 
     const handleCardClick = cardIndex => {
@@ -179,6 +194,7 @@ const Game = ({ game, playerId }) => {
 
     return (
       <PlayerCards
+        cardBeenWatched={cardBeenWatched && !isSelfToPlay ? cardBeenWatched : null}
         cardPlayerId={cardPlayerId}
         cards={cards}
         onCardHide={handleHideCard}

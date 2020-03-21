@@ -52,6 +52,7 @@ const setPlayerTmpCard = (game, playerId, card) => {
 
 const create = name => ({
   cards: null, // Just to keep the generated deck somewhere
+  cardBeenWatched: null,
   discardPile: null, // Trash card pile
   drawPile: null, // Draw card pile
   id: uuidv4(),
@@ -83,6 +84,7 @@ const end = (game, playerIdFirstToFinish) => {
 
   return {
     ...game,
+    cardBeenWatched: null,
     isReady: false,
     isStarted: false,
     nextActions: [],
@@ -280,20 +282,14 @@ const setPlayerHasDiscoveredHisCards = (game, playerId) => {
   };
 };
 
-const setPlayerHasWatched = (game, playerId) => {
-  console.log('setPlayerHasWatched', { playerId });
-  const { players, nextActions: oldActions } = game;
-  // Set player is not looking a card anymore
-  let player = players[playerId];
-  player = Player.setIsWatching(player, null);
+const setPlayerHasWatched = game => {
+  console.log('setPlayerHasWatched');
+  const { nextActions: oldActions } = game;
 
   return {
     ...game,
-    nextActions: [...oldActions.slice(1)], // Remove last action, push more if necessary
-    players: {
-      ...players,
-      [playerId]: player
-    }
+    cardBeenWatched: null,
+    nextActions: [...oldActions.slice(1)] // Remove last action
   };
 };
 
@@ -310,18 +306,12 @@ const setPlayerIsReady = (game, playerId) => {
 };
 
 const setPlayerIsWatching = (game, playerId, card) => {
-  console.log('setPlayerIsWatching', { playerId, card });
   const { players } = game;
   const player = players[playerId];
+
   return {
     ...game,
-    players: {
-      ...players,
-      [playerId]: {
-        ...player,
-        isWatching: card
-      }
-    }
+    cardBeenWatched: { ...card, player }
   };
 };
 
@@ -332,10 +322,10 @@ const setup = game => {
   const playersCollectionWithDealer = Players.setDealer(playersCollection);
 
   // Generate cards
-  const cards = Cards.getDeck(nbrOfPlayers > 2); // Joker only for 3+ players
   const nbrOfPlayers = Players.getCount(playersCollection);
   const nbrCardsPerPlayer = nbrOfPlayers > 5 ? 6 : 4;
   const nbrCardsForPlayers = nbrOfPlayers * nbrCardsPerPlayer;
+  const cards = Cards.getDeck(nbrOfPlayers > 2); // Joker only for 3+ players
   const deckOfCards =
     nbrOfPlayers > 5
       ? cards.concat(cards) // Two pack for +6 players

@@ -72,7 +72,7 @@ io.on('connection', socket => {
   });
 
   // When a user saw his cards at the begin of the game
-  socket.on('game.setPlayerhasDiscoveredHisCards', ({ gameId, playerId }) => {
+  socket.on('game.hasDiscoveredHisCards', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
     // Update player, if all players have seen their cards, start the game
     game = Game.setPlayerHasDiscoveredHisCards(game, playerId);
@@ -96,10 +96,21 @@ io.on('connection', socket => {
   });
 
   // When an user confirm he has seen the card
-  socket.on('game.hasWatchedCard', ({ gameId, playerId }) => {
+  socket.on('game.watchCard', ({ gameId, playerId, card }) => {
+    let game = FakeDB.getGame(gameId);
+    // Add card to player as watching
+    game = Game.setPlayerIsWatching(game, playerId, card);
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
+  });
+
+  // When an user confirm he has seen the card
+  socket.on('game.hasWatchedCard', ({ gameId }) => {
     let game = FakeDB.getGame(gameId);
     // Set has discover if game is still in discovery mode (beginning of the game)
-    game = Game.setPlayerHasWatched(game, playerId);
+    game = Game.setPlayerHasWatched(game);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
