@@ -13,6 +13,7 @@ const PlayerCards = ({
   onCardHide,
   onCardPick,
   selectedCards,
+  shouldRevealAllCards,
   unfoldedCards
 }) => {
   const isCardBeingWatched = cardIndex => {
@@ -28,7 +29,8 @@ const PlayerCards = ({
       {cards.map((card, cardIndex) =>
         card ? (
           <CardWrapper key={cardIndex}>
-            {unfoldedCards[cardPlayerId] && unfoldedCards[cardPlayerId][cardIndex] ? (
+            {(unfoldedCards[cardPlayerId] && unfoldedCards[cardPlayerId][cardIndex]) ||
+            shouldRevealAllCards ? (
               <PlayingCard card={card} onClick={() => onCardHide(cardIndex, cardPlayerId)} />
             ) : (
               // TEMP: keep cards visibile to ease debugging
