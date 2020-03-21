@@ -7,7 +7,7 @@ import PlayingCard from '../../PlayingCard';
 import { CardInfo, CardWrapper } from './_styled';
 
 const PlayerCards = ({
-  cardBeenWatched,
+  cardBeingWatched,
   cardPlayerId,
   cards,
   onCardHide,
@@ -15,11 +15,11 @@ const PlayerCards = ({
   selectedCards,
   unfoldedCards
 }) => {
-  const isCardBeenWatched = cardIndex => {
+  const isCardBeingWatched = cardIndex => {
     return (
-      cardBeenWatched &&
-      cardBeenWatched.index === cardIndex &&
-      cardBeenWatched.cardPlayerId === cardPlayerId
+      cardBeingWatched &&
+      cardBeingWatched.index === cardIndex &&
+      cardBeingWatched.cardPlayerId === cardPlayerId
     );
   };
 
@@ -33,8 +33,8 @@ const PlayerCards = ({
             ) : (
               // TEMP: keep cards visibile to ease debugging
               <div style={{ opacity: 0.15 }}>
-                {isCardBeenWatched(cardIndex) && (
-                  <CardInfo>{cardBeenWatched.player.name} is watching</CardInfo>
+                {isCardBeingWatched(cardIndex) && (
+                  <CardInfo>{cardBeingWatched.player.name} is watching</CardInfo>
                 )}
                 <PlayingCard
                   card={card}

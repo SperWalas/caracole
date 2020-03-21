@@ -52,7 +52,7 @@ const setPlayerTmpCard = (game, playerId, card) => {
 
 const create = name => ({
   cards: null, // Just to keep the generated deck somewhere
-  cardBeenWatched: null,
+  cardBeingWatched: null,
   discardPile: null, // Trash card pile
   drawPile: null, // Draw card pile
   id: uuidv4(),
@@ -84,7 +84,7 @@ const end = (game, playerIdFirstToFinish) => {
 
   return {
     ...game,
-    cardBeenWatched: null,
+    cardBeingWatched: null,
     isReady: false,
     isStarted: false,
     nextActions: [],
@@ -288,7 +288,7 @@ const setPlayerHasWatched = game => {
 
   return {
     ...game,
-    cardBeenWatched: null,
+    cardBeingWatched: null,
     nextActions: [...oldActions.slice(1)] // Remove last action
   };
 };
@@ -311,7 +311,7 @@ const setPlayerIsWatching = (game, playerId, card) => {
 
   return {
     ...game,
-    cardBeenWatched: { ...card, player }
+    cardBeingWatched: { ...card, player }
   };
 };
 
