@@ -8,6 +8,7 @@ export const color = {
   dustyGray: '#969696',
   silver: '#c8c8c8',
   mercury: '#e1e1e1',
+  white: '#fff',
 
   governorBay: '#3a50c0', // Blue
   emerald: '#00C241', // Green
