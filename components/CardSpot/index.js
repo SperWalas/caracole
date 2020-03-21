@@ -15,8 +15,8 @@ const LabelWrapper = styled(Column)`
   left: 0;
   right: 0;
   /* compensate card padding */
-  top: 3px;
-  bottom: 6px;
+  top: 1px;
+  bottom: 1px;
   align-items: center;
   justify-content: center;
   padding: ${theme.spacing.s1};
@@ -24,7 +24,7 @@ const LabelWrapper = styled(Column)`
   border-radius: 6px;
   background: ${theme.color.backgroundAccented};
   text-transform: uppercase;
-  font-size: ${theme.fontSize.larger};
+  font-size: ${theme.fontSize.large};
   font-weight: ${theme.fontWeight.medium};
   line-height: 1.5;
   color: ${theme.color.border};

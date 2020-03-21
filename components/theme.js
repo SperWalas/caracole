@@ -70,7 +70,7 @@ const theme = {
   },
   metric: {
     borderRadius: rem('3px'),
-    cardWidth: rem('80px'),
+    cardWidth: rem('90px'),
 
     smallContainer: rem('400px'),
     mediumContainer: rem('600px'),
