@@ -25,7 +25,7 @@ const Game = () => {
     nextPlayer
   } = useCardActions();
 
-  const { discardPile, name, players, isReady, isStarted } = game;
+  const { cardBeingWatched, discardPile, name, players, isReady, isStarted } = game;
 
   const selfPlayer = Object.values(players).find(p => p.id === selfId) || {};
   const otherPlayers = Object.values(players).filter(p => p.id !== selfId) || [];
@@ -46,6 +46,7 @@ const Game = () => {
 
         {isReady ? (
           <PlayerCards
+            cardBeingWatched={!isSelfToPlay ? cardBeingWatched : null}
             cardPlayerId={player.id}
             cards={player.cards}
             onCardHide={handleHideCard}
@@ -71,6 +72,7 @@ const Game = () => {
   return (
     <Column flex="1 0" padding="s3">
       <Column flex="1 0" justifyContent="space-between" spacing="s6">
+        {/* TODO spread other players around a circle*/}
         <Row justifyContent="space-around" spacing="s3">
           {otherPlayers.map((player, index) => renderPlayerDeck(player, index))}
         </Row>
@@ -92,8 +94,8 @@ const Game = () => {
                   )}
                 </>
               )}
-
               <Column>
+                <Body bold>Scores</Body>
                 {Object.keys(players).map(pid => {
                   const { name, scores } = players[pid];
                   return (
