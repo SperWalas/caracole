@@ -57,7 +57,7 @@ const theme = {
   },
   fontWeight: {
     normal: 400,
-    medium: 500
+    medium: 600
   },
   lineHeight: {
     small: rem('16px'),

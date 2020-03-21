@@ -56,20 +56,20 @@ export default styled(forwardRef(DivWithoutSpacing))`
     `};
 
   && {
-    ${getStyleFromProps('alignContent')}
-    ${getStyleFromProps('alignItems')}
-    ${getStyleFromProps('alignSelf')}
-    ${getStyleFromProps('flex')}
-    ${getStyleFromProps('flexBasis')}
-    ${getStyleFromProps('flexDirection')}
-    ${getStyleFromProps('flexGrow')}
-    ${getStyleFromProps('flexShrink')}
-    ${getStyleFromProps('flexWrap')}
-    ${getStyleFromProps('justifyContent')}
-    ${getStyleFromProps('justifyItems')}
-    ${getStyleFromProps('justifySelf')}
-    ${getStyleFromProps('order')}
-    ${getStyleFromProps('textAlign')}
-    ${getStyleFromProps('width')}
+    ${getStyleFromProps('alignContent')};
+    ${getStyleFromProps('alignItems')};
+    ${getStyleFromProps('alignSelf')};
+    ${getStyleFromProps('flex')};
+    ${getStyleFromProps('flexBasis')};
+    ${getStyleFromProps('flexDirection')};
+    ${getStyleFromProps('flexGrow')};
+    ${getStyleFromProps('flexShrink')};
+    ${getStyleFromProps('flexWrap')};
+    ${getStyleFromProps('justifyContent')};
+    ${getStyleFromProps('justifyItems')};
+    ${getStyleFromProps('justifySelf')};
+    ${getStyleFromProps('order')};
+    ${getStyleFromProps('textAlign')};
+    ${getStyleFromProps('width')};
   }
 `;
