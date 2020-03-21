@@ -332,10 +332,10 @@ const setup = game => {
   const playersCollectionWithDealer = Players.setDealer(playersCollection);
 
   // Generate cards
-  const cards = Cards.getDeck(nbrOfPlayers > 2); // Joker only for 3+ players
   const nbrOfPlayers = Players.getCount(playersCollection);
   const nbrCardsPerPlayer = nbrOfPlayers > 5 ? 6 : 4;
   const nbrCardsForPlayers = nbrOfPlayers * nbrCardsPerPlayer;
+  const cards = Cards.getDeck(nbrOfPlayers > 2); // Joker only for 3+ players
   const deckOfCards =
     nbrOfPlayers > 5
       ? cards.concat(cards) // Two pack for +6 players
