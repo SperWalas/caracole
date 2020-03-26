@@ -199,7 +199,7 @@ io.on('connection', socket => {
 
   socket.on('game.giveCard', ({ gameId, playerId, card }) => {
     let game = FakeDB.getGame(gameId);
-    // Give card to someone (playerIdToGiveTo is in the nextActions of the game)
+    // Give card to someone (playerToAddACard is in the nextActions of the game)
     game = Game.givePlayerCard(game, playerId, card);
     // Check if game is done
     if (Game.isDone(game)) {
@@ -216,7 +216,7 @@ io.on('connection', socket => {
   socket.on('game.swapCard', ({ gameId, cards }) => {
     console.log('swapCard', { cards });
     let game = FakeDB.getGame(gameId);
-    // Give card to someone (playerIdToGiveTo is in the nextActions of the game)
+    // Give card to someone (playerToAddACard is in the nextActions of the game)
     game = Game.swapPlayersCards(game, cards);
     // Save
     FakeDB.saveGame(game);

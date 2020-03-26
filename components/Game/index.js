@@ -44,21 +44,21 @@ const Game = () => {
           </Heading>
         </Row>
 
-        {isReady ? (
-          <PlayerCards
-            cardBeingWatched={!isSelfToPlay ? cardBeingWatched : null}
-            cardPlayerId={player.id}
-            cards={player.cards}
-            onCardHide={handleHideCard}
-            onCardPick={handleCardClick}
-            selectedCards={selectedCards}
-            unfoldedCards={unfoldedCards}
-          />
-        ) : player.isReady ? (
-          <Body>Ready</Body>
-        ) : (
+        <PlayerCards
+          cardBeingWatched={!isSelfToPlay ? cardBeingWatched : null}
+          cardPlayerId={player.id}
+          cards={player.cards}
+          onCardHide={handleHideCard}
+          onCardPick={handleCardClick}
+          selectedCards={selectedCards}
+          shouldRevealAllCards={!isReady}
+          unfoldedCards={unfoldedCards}
+        />
+        {!isReady && (
           <>
-            {isSelf ? (
+            {player.isReady ? (
+              <Body>Ready</Body>
+            ) : isSelf ? (
               <Button onClick={handlePlayerReady}>Let’s go !</Button>
             ) : (
               <Body>Not ready yet…</Body>

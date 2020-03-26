@@ -122,8 +122,7 @@ const givePlayerCard = (game, playerId, card) => {
   // Get card
   const cardToGive = getCard(game, card);
   // Find to whom player should give
-  const [{ playerIdToGiveTo }] = oldActions;
-  const playerToAddACard = players[playerIdToGiveTo];
+  const [{ playerToAddACard }] = oldActions;
   const playerToRemoveACard = players[playerId];
 
   return {
@@ -166,6 +165,7 @@ const setCardToDiscardPile = (game, playerId, card) => {
   let { discardPile, nextActions: oldActions, players: playersCollection } = game;
   const cardToThrow = getCard(game, card);
   let player = playersCollection[card.playerId];
+  let playerThrowing = playersCollection[playerId];
   let nextActions = [];
 
   // If player that throw the card has a tmp card,
@@ -200,7 +200,10 @@ const setCardToDiscardPile = (game, playerId, card) => {
   // When player have to give a card to an other player
   // This action should be the next in the queue
   if (playerId !== card.playerId) {
-    nextActions = [{ player, action: 'give', playerIdToGiveTo: card.playerId }, ...nextActions];
+    nextActions = [
+      { player: playerThrowing, action: 'give', playerToAddACard: player },
+      ...nextActions
+    ];
   }
 
   return {
