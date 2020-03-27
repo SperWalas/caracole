@@ -21,10 +21,22 @@ const addCard = (player, cardToAdd, cardIndex) => {
   };
 };
 
-const calcScores = (player, isFirstToFinish = false) => ({
-  ...player,
-  scores: [...player.scores, isFirstToFinish ? -5 : Cards.calcScore(player.cards)]
-});
+const calcScores = (player, isFirstToFinish = false, hasCaracoleSucceed) => {
+  let score = Cards.calcScore(player.cards);
+  if (isFirstToFinish) {
+    score = -5;
+  }
+  if (hasCaracoleSucceed === false) {
+    score = 21;
+  }
+  if (hasCaracoleSucceed === true) {
+    score = -21;
+  }
+  return {
+    ...player,
+    scores: [...player.scores, score]
+  };
+};
 
 const create = name => ({
   cards: [],

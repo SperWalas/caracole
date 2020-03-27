@@ -12,7 +12,7 @@ import PickedCard from './PickedCard';
 import PlayerCards from './PlayerCards';
 
 const Game = () => {
-  const { game, selfId, selectedCards, unfoldedCards } = useGame();
+  const { handleTriggerCaracole, game, selfId, selectedCards, unfoldedCards } = useGame();
   const {
     handleCardClick,
     handleHideCard,
@@ -35,6 +35,7 @@ const Game = () => {
   const renderPlayerDeck = (player, key) => {
     const isPlayerToPlay = nextPlayer && nextPlayer.id === player.id;
     const isSelf = selfPlayer.id === player.id;
+    const canCaracole = isSelf && isPlayerToPlay && nextAction === 'pick' && !game.caracolePlayer;
 
     return (
       <Column spacing="s2" key={key} alignItems="center">
@@ -54,6 +55,10 @@ const Game = () => {
           shouldRevealAllCards={!isReady}
           unfoldedCards={unfoldedCards}
         />
+        {!!canCaracole && isReady && (
+          <Button onClick={() => handleTriggerCaracole(player)}>Caracoler !</Button>
+        )}
+
         {!isReady && (
           <>
             {player.isReady ? (

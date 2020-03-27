@@ -111,6 +111,10 @@ io.on('connection', socket => {
     let game = FakeDB.getGame(gameId);
     // Set has discover if game is still in discovery mode (beginning of the game)
     game = Game.setPlayerHasWatched(game);
+    // Check if game is done (in case someone caracoled and last player watched one of his card)
+    if (Game.isDone(game)) {
+      game = Game.end(game);
+    }
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
@@ -173,14 +177,20 @@ io.on('connection', socket => {
       //   ...card
       // });
     }
-
     // Check if game is done
     if (Game.isDone(game)) {
-      // TODO: let people who has the same card to throw even if the game is over
-      console.log('GAME IS OVER');
-      game = Game.end(game, playerId);
+      game = Game.end(game);
     }
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
+  });
 
+  socket.on('game.triggerCaracole', ({ gameId, playerId }) => {
+    let game = FakeDB.getGame(gameId);
+    // Set tmp card to discardPile
+    game = Game.setCaracolePlayer(game, playerId);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
@@ -191,6 +201,10 @@ io.on('connection', socket => {
     let game = FakeDB.getGame(gameId);
     // Set tmp card to discardPile
     game = Game.setTmpCardToDiscardPile(game, playerId);
+    // Check if game is done
+    if (Game.isDone(game)) {
+      game = Game.end(game);
+    }
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
@@ -203,9 +217,7 @@ io.on('connection', socket => {
     game = Game.givePlayerCard(game, playerId, card);
     // Check if game is done
     if (Game.isDone(game)) {
-      // TODO: let people who has the same card to throw even if the game is over
-      console.log('GAME IS OVER');
-      game = Game.end(game, playerId);
+      game = Game.end(game);
     }
     // Save
     FakeDB.saveGame(game);
@@ -218,6 +230,10 @@ io.on('connection', socket => {
     let game = FakeDB.getGame(gameId);
     // Give card to someone (playerToAddACard is in the nextActions of the game)
     game = Game.swapPlayersCards(game, cards);
+    // Check if game is done
+    if (Game.isDone(game)) {
+      game = Game.end(game);
+    }
     // Save
     FakeDB.saveGame(game);
     // Respond to clients

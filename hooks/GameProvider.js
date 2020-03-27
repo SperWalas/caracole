@@ -31,7 +31,7 @@ const GameProvider = ({ children }) => {
     [unfoldedCards]
   );
 
-  useSocket('game.update', game => {
+  const socket = useSocket('game.update', game => {
     console.log({ game });
     setGame(game);
   });
@@ -39,6 +39,10 @@ const GameProvider = ({ children }) => {
   useSocket('game.you', playerId => {
     setSelfId(playerId);
   });
+
+  const handleTriggerCaracole = player => {
+    socket.emit('game.triggerCaracole', { gameId: game.id, playerId: player.id });
+  };
 
   const hideCard = (cardIndex, cardPlayerId) => {
     setUnfoldedCards({
@@ -75,6 +79,7 @@ const GameProvider = ({ children }) => {
   const value = {
     discoveredCardsCount,
     game,
+    handleTriggerCaracole,
     hideCard,
     resetCards,
     revealCard,
