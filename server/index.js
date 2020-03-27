@@ -158,6 +158,10 @@ io.on('connection', socket => {
     // If player has a tmpCard and throw one of his card
     if (player.tmpCard && playerId === card.playerId) {
       game = Game.setCardToDiscardPile(game, playerId, card);
+      // Check if game is done
+      if (Game.isDone(game)) {
+        game = Game.end(game);
+      }
     }
     // If a player throws his or someone's card
     else if (Game.isCardCanBeThrown(game, card)) {
@@ -176,10 +180,6 @@ io.on('connection', socket => {
       //   ...cardThrown,
       //   ...card
       // });
-    }
-    // Check if game is done
-    if (Game.isDone(game)) {
-      game = Game.end(game);
     }
     // Save
     FakeDB.saveGame(game);
