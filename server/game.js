@@ -210,15 +210,15 @@ const setCardToDiscardPile = (game, playerId, card) => {
 
   // TODO: The order of Q matter? (if multiple player put a Q)
   if (cardToThrow.value === 'Q') {
-    nextActions = [{ player, action: 'watch' }, ...nextActions];
+    nextActions = [{ player: playerThrowing, action: 'watch' }, ...nextActions];
   }
   if (cardToThrow.value === 'Joker') {
     // Create action to swipe a card
-    nextActions = [{ player, action: 'swap' }, ...nextActions];
+    nextActions = [{ player: playerThrowing, action: 'swap' }, ...nextActions];
   }
   if (cardToThrow.value === 'J') {
     // Create action to swipe a card
-    nextActions = [{ player, action: 'exchange' }, ...nextActions];
+    nextActions = [{ player: playerThrowing, action: 'exchange' }, ...nextActions];
   }
 
   // When player have to give a card to an other player
