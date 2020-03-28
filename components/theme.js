@@ -11,6 +11,7 @@ export const color = {
   white: '#fff',
 
   governorBay: '#3a50c0', // Blue
+  forestGreen: '#1f8436', // Green
   emerald: '#00C241', // Green
   jaffa: '#fe990d', // Orange
   monza: '#e60c0c' // Red

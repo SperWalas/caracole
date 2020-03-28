@@ -9,6 +9,11 @@ import GameProvider from '../hooks/GameProvider';
 // Override global style to avoid Story height to be 100% of the screen height
 const GlobalStyle = createGlobalStyle`
   ${normalize()};
+  body {
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    background: url('/assets/green_felt.jpg') center;
+    background-size: cover;
+  }
 `;
 
 class MyApp extends App {
