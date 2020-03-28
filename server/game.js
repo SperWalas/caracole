@@ -51,6 +51,7 @@ const setPlayerTmpCard = (game, playerId, card) => {
 };
 
 const create = name => ({
+  caracolePlayer: null, // player that triggers caracole
   cards: null, // Just to keep the generated deck somewhere
   cardBeingWatched: null,
   discardPile: null, // Trash card pile
@@ -68,14 +69,11 @@ const canStart = game => {
   return Players.areAllReady(playersCollection) && Players.getCount(playersCollection) > 1;
 };
 
-const end = (game, playerIdFirstToFinish) => {
+const end = game => {
   console.log('end');
-  const { players: playersCollection } = game;
+  const { players: playersCollection, caracolePlayer } = game;
   // Calc scores
-  const playersCollectionWithScoresUpdated = Players.calcScores(
-    playersCollection,
-    playerIdFirstToFinish
-  );
+  const playersCollectionWithScoresUpdated = Players.calcScores(playersCollection, caracolePlayer);
   // Reset isReady status to false for all players
   const playersCollectionHasUnready = Players.setAllIsReady(
     playersCollectionWithScoresUpdated,
@@ -84,6 +82,7 @@ const end = (game, playerIdFirstToFinish) => {
 
   return {
     ...game,
+    caracolePlayer: null,
     cardBeingWatched: null,
     isReady: false,
     isStarted: false,
@@ -111,7 +110,18 @@ const isCardCanBeThrown = (game, card) => {
 };
 
 const isDone = game => {
-  const { players: playersCollection } = game;
+  const { caracolePlayer, players: playersCollection, nextActions } = game;
+
+  const [nextAction] = nextActions;
+  // If final round after calling caracol is done, game's end
+  if (
+    caracolePlayer &&
+    nextAction.player.id === caracolePlayer.id &&
+    nextAction.action === 'pick'
+  ) {
+    return true;
+  }
+  // If someone doesn't have cards anymore
   const players = Object.values(playersCollection);
   return players.find(Player.isDone);
 };
@@ -159,6 +169,20 @@ const removeDrawCard = game => {
   };
 };
 
+const setCaracolePlayer = (game, playerId) => {
+  const { players } = game;
+
+  // Get next player to pick
+  const playerThatCaracole = players[playerId];
+  const nextPlayer = Players.getNext(players, playerThatCaracole);
+
+  return {
+    ...game,
+    nextActions: [{ player: nextPlayer, action: 'pick' }],
+    caracolePlayer: players[playerId]
+  };
+};
+
 const setCardToDiscardPile = (game, playerId, card) => {
   console.log('setCardToDiscardPile', { playerId, card });
 
@@ -186,15 +210,15 @@ const setCardToDiscardPile = (game, playerId, card) => {
 
   // TODO: The order of Q matter? (if multiple player put a Q)
   if (cardToThrow.value === 'Q') {
-    nextActions = [{ player, action: 'watch' }, ...nextActions];
+    nextActions = [{ player: playerThrowing, action: 'watch' }, ...nextActions];
   }
   if (cardToThrow.value === 'Joker') {
     // Create action to swipe a card
-    nextActions = [{ player, action: 'swap' }, ...nextActions];
+    nextActions = [{ player: playerThrowing, action: 'swap' }, ...nextActions];
   }
   if (cardToThrow.value === 'J') {
     // Create action to swipe a card
-    nextActions = [{ player, action: 'exchange' }, ...nextActions];
+    nextActions = [{ player: playerThrowing, action: 'exchange' }, ...nextActions];
   }
 
   // When player have to give a card to an other player
@@ -388,6 +412,7 @@ module.exports = {
   isDone,
   removeDiscardCard,
   removeDrawCard,
+  setCaracolePlayer,
   setCardToDiscardPile,
   setPlayerHasDiscoveredHisCards,
   setPlayerHasWatched,

@@ -1,3 +1,4 @@
+const Cards = require('./cards');
 const Player = require('./player');
 
 // Create a players object
@@ -14,15 +15,29 @@ const areAllReady = playersCollection => {
   return players.every(p => p.isReady);
 };
 
-const calcScores = (playersCollection, playerIdFirstToFinish) => {
+const calcScores = (playersCollection, caracolePlayer) => {
   const players = Object.values(playersCollection);
-  return players.reduce(
-    (playersWithScoresUpdated, player) => ({
+
+  // Check here if player has caracole if it has lower than other
+  const haveSucceedCaracole = ({ id: playerId, cards }) => {
+    // Check only for the player who triggers caracole
+    if (caracolePlayer && caracolePlayer.id === playerId) {
+      const caracolePlayerScore = Cards.calcScore(cards);
+      const playerWithSameOrBetterScore = players.find(
+        player => player.id !== playerId && Cards.calcScore(player.cards) <= caracolePlayerScore
+      );
+      return !playerWithSameOrBetterScore;
+    }
+    return undefined;
+  };
+
+  return players.reduce((playersWithScoresUpdated, player) => {
+    const isFirstToFinish = !caracolePlayer && Player.isDone(player);
+    return {
       ...playersWithScoresUpdated,
-      [player.id]: Player.calcScores(player, playerIdFirstToFinish === player.id)
-    }),
-    {}
-  );
+      [player.id]: Player.calcScores(player, isFirstToFinish, haveSucceedCaracole(player))
+    };
+  }, {});
 };
 
 const distributeCards = (playersCollection, cardsToDistribute) => {
