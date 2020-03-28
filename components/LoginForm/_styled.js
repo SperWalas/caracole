@@ -14,7 +14,7 @@ export const StyledCard = styled(Card)`
 
 export const HeroTitle = styled(Heading)`
   color: ${theme.color.forestGreen};
-  text-shadow: #4aaf61 ${rem('1px')} ${rem('1px')} 0;
+  text-shadow: #46ad5d ${rem('1px')} ${rem('1px')} 0, #2e6f3c ${rem('-1px')} ${rem('-1px')} 0;
   font-size: ${theme.fontSize.jumbo};
   line-height: ${theme.lineHeight.jumbo};
   letter-spacing: -0.03em;
