@@ -1,0 +1,12 @@
+{
+  "deploy": {
+    "production": {
+      "user": "__USER_NAME__",
+      "host": "__SERVER_IP__",
+      "path": "__SERVER_PATH__",
+      "ref": "origin/master",
+      "repo": "git@github.com:SperWalas/caracole.git",
+      "post-deploy": "make install && make build && pm2 start yarn --name 'Caracole.game' -- start"
+    }
+  }
+}
