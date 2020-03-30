@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Row, Column } from '../layout';
-import { Heading, Subheading, Body } from '../text';
+import { Heading, Subheading, Body, Link } from '../text';
 
 import Button from '../Button';
 import DiscardPile from './DiscardPile';
@@ -10,6 +10,7 @@ import useCardActions from '../../hooks/useCardActions';
 import PickedCard from './PickedCard';
 import PlayerCards from './PlayerCards';
 import Scoreboard from './Scoreboard';
+import { RelativeRow } from './_styled';
 
 const Game = () => {
   const { handleTriggerCaracole, game, selfId, selectedCards, unfoldedCards } = useGame();
@@ -99,7 +100,7 @@ const Game = () => {
               </>
             )}
           </Column>
-          <Row spacing="s8" justifyContent="center">
+          <RelativeRow justifyContent="center">
             <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
             <DiscardPile
               discardPile={isStarted ? discardPile : undefined}
@@ -109,10 +110,10 @@ const Game = () => {
                   onDrawNew: handlePickDrawCard
                 })}
             />
-          </Row>
+          </RelativeRow>
           <Row justifyContent="center">
             <Scoreboard players={players}>
-              {({ open }) => <Body onClick={open}>See scores</Body>}
+              {({ open }) => <Link onClick={open}>see scores</Link>}
             </Scoreboard>
           </Row>
         </Column>

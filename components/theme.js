@@ -48,6 +48,7 @@ const theme = {
     textSubdued: color.dustyGray,
 
     border: color.mercury,
+    darkShadow: rgba(color.black, 0.4),
     shadow: rgba(color.black, 0.1)
   },
   fontSize: {
