@@ -40,6 +40,7 @@ const theme = {
 
     background: color.white,
     backgroundAccented: color.alabaster,
+    backgroundOverlay: rgba(color.black, 0.3),
 
     text: color.codGray,
     textDisabled: color.silver,
