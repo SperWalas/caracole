@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 
 import theme from '../theme';
 
-const DECK_COLOR = 'blue'; // 'blue' | 'red'
+export const DECK_COLOR = 'blue'; // 'blue' | 'red'
 
 const SUIT_LETTER = {
   clubs: 'C',
@@ -12,9 +12,9 @@ const SUIT_LETTER = {
   spades: 'S'
 };
 
-const StyledImg = styled.img`
+export const StyledImg = styled.img`
   width: ${theme.metric.cardWidth};
-  height: auto;
+  height: calc(${theme.metric.cardWidth} * 1.4);
   border-radius: ${theme.metric.borderRadius};
 
   ${props =>
