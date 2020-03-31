@@ -1,15 +1,16 @@
 import React from 'react';
 
 import { Row, Column } from '../layout';
-import { Subheading, Heading, Body } from '../text';
+import { Heading, Subheading, Body, Link } from '../text';
 
 import Button from '../Button';
 import DiscardPile from './DiscardPile';
 import useGame from '../../hooks/useGame';
 import useCardActions from '../../hooks/useCardActions';
-import { Card } from '../layout';
 import PickedCard from './PickedCard';
 import PlayerCards from './PlayerCards';
+import Scoreboard from './Scoreboard';
+import { RelativeRow } from './_styled';
 
 const Game = () => {
   const { handleTriggerCaracole, game, selfId, selectedCards, unfoldedCards } = useGame();
@@ -40,9 +41,9 @@ const Game = () => {
     return (
       <Column spacing="s2" key={key} alignItems="center">
         <Row spacing="s2">
-          <Heading highlighted={isPlayerToPlay}>
+          <Subheading highlighted={isPlayerToPlay}>
             {!!isPlayerToPlay && '→'} {player.name} {!!isPlayerToPlay && '←'}
-          </Heading>
+          </Subheading>
         </Row>
 
         <PlayerCards
@@ -82,48 +83,40 @@ const Game = () => {
           {otherPlayers.map((player, index) => renderPlayerDeck(player, index))}
         </Row>
 
-        <Card>
-          <Row justifyContent="space-between">
-            <Column spacing="s3">
-              <Subheading>Game name : {name}</Subheading>
-              {!!nextPlayer && !!nextAction ? (
-                <Heading withHighlightedParts>
-                  Turn of <strong>{nextPlayer.name}</strong> to <strong>{nextAction}</strong>
-                </Heading>
-              ) : (
-                <>
-                  {!isReady ? (
-                    <Heading>Waiting for every player to be ready</Heading>
-                  ) : (
-                    !isStarted && <Heading>Every player should remember 2 of their cards</Heading>
-                  )}
-                </>
-              )}
-              <Column>
-                <Body bold>Scores</Body>
-                {Object.keys(players).map(pid => {
-                  const { name, scores } = players[pid];
-                  return (
-                    <Body key={pid}>
-                      {name}: {scores.reduce((sum, score) => sum + score, 0)}
-                    </Body>
-                  );
+        <Column spacing="s2" justifyContent="center">
+          <Column textAlign="center">
+            <Body>Game name: {name}</Body>
+            {!!nextPlayer && !!nextAction ? (
+              <Heading withHighlightedParts>
+                Turn of <strong>{nextPlayer.name}</strong> to <strong>{nextAction}</strong>
+              </Heading>
+            ) : (
+              <>
+                {!isReady ? (
+                  <Heading>Waiting for every player to be ready</Heading>
+                ) : (
+                  !isStarted && <Heading>Every player should remember 2 of their cards</Heading>
+                )}
+              </>
+            )}
+          </Column>
+          <RelativeRow justifyContent="center">
+            <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
+            <DiscardPile
+              discardPile={isStarted ? discardPile : undefined}
+              {...(isSelfToPlay &&
+                nextAction === 'pick' && {
+                  onDrawDiscarded: handlePickDiscardCard,
+                  onDrawNew: handlePickDrawCard
                 })}
-              </Column>
-            </Column>
-            <Row spacing="s8" justifyContent="flex-end">
-              <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
-              <DiscardPile
-                discardPile={isStarted ? discardPile : undefined}
-                {...(isSelfToPlay &&
-                  nextAction === 'pick' && {
-                    onDrawDiscarded: handlePickDiscardCard,
-                    onDrawNew: handlePickDrawCard
-                  })}
-              />
-            </Row>
+            />
+          </RelativeRow>
+          <Row justifyContent="center">
+            <Scoreboard players={players}>
+              {({ open }) => <Link onClick={open}>see scores</Link>}
+            </Scoreboard>
           </Row>
-        </Card>
+        </Column>
 
         <Row justifyContent="space-around">{renderPlayerDeck(selfPlayer)}</Row>
       </Column>

@@ -1,15 +1,14 @@
 import React from 'react';
-import { Column } from '../../layout';
-import { Subheading } from '../../text';
-import PlayingCard from '../../PlayingCard';
 
-const PickedCard = ({ card, onClick }) => {
+import PlayingCard from '../../PlayingCard';
+import { PickedCardWrapper } from './_styled';
+
+const PickedCard = ({ card, className, onClick }) => {
   return (
     card && (
-      <Column spacing="s2">
-        <Subheading>Picked card</Subheading>
-        <PlayingCard card={card} onClick={onClick} />
-      </Column>
+      <PickedCardWrapper>
+        <PlayingCard className={className} card={card} onClick={onClick} />
+      </PickedCardWrapper>
     )
   );
 };
