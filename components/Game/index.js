@@ -18,7 +18,9 @@ const Game = () => {
     handleCardClick,
     handleHideCard,
     handlePickDrawCard,
+    handlePickDrawCardAfterFail,
     handlePickDiscardCard,
+    handlePickFailedCard,
     handlePlayerReady,
     handleThrowTmpCard,
     isSelfToPlay,
@@ -26,7 +28,7 @@ const Game = () => {
     nextPlayer
   } = useCardActions();
 
-  const { cardBeingWatched, discardPile, name, players, isReady, isStarted } = game;
+  const { cardBeingWatched, discardPile, failedCard, name, players, isReady, isStarted } = game;
 
   const selfPlayer = Object.values(players).find(p => p.id === selfId) || {};
   const otherPlayers = Object.values(players).filter(p => p.id !== selfId) || [];
@@ -104,10 +106,19 @@ const Game = () => {
             <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
             <DiscardPile
               discardPile={isStarted ? discardPile : undefined}
+              failedCard={failedCard}
               {...(isSelfToPlay &&
                 nextAction === 'pick' && {
                   onDrawDiscarded: handlePickDiscardCard,
                   onDrawNew: handlePickDrawCard
+                })}
+              {...(isSelfToPlay &&
+                nextAction === 'pickFailed' && {
+                  onPickFailedCard: handlePickFailedCard
+                })}
+              {...(isSelfToPlay &&
+                nextAction === 'pickDrawAfterFail' && {
+                  onDrawNew: handlePickDrawCardAfterFail
                 })}
             />
           </RelativeRow>

@@ -79,9 +79,19 @@ const useCardActions = () => {
     socket.emit('game.pickDrawCard', { gameId, playerId: selfId });
   };
 
+  const handlePickDrawCardAfterFail = () => {
+    console.log('pickDrawCardAfterFail');
+    socket.emit('game.pickDrawCardAfterFail', { gameId, playerId: selfId });
+  };
+
   const handlePickDiscardCard = () => {
     console.log('handlePickDiscardCard');
     socket.emit('game.pickDiscardCard', { gameId, playerId: selfId });
+  };
+
+  const handlePickFailedCard = () => {
+    console.log('handlePickFailedCard');
+    socket.emit('game.pickFailedCard', { gameId, playerId: selfId });
   };
 
   const handleThrowTmpCard = () => {
@@ -143,7 +153,9 @@ const useCardActions = () => {
     handleCardClick,
     handleHideCard,
     handlePickDrawCard,
+    handlePickDrawCardAfterFail,
     handlePickDiscardCard,
+    handlePickFailedCard,
     handlePlayerReady,
     handleThrowTmpCard,
     isSelfToPlay,
