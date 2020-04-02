@@ -131,8 +131,16 @@ io.on('connection', socket => {
     FakeDB.saveGame(game);
     // Respond to clients
     sendGameUpdateToClients(gameId);
-    // Send card only to client
-    socket.emit('game.pickedCard', card);
+  });
+
+  socket.on('game.pickDrawCardAfterFail', ({ gameId, playerId }) => {
+    console.log('game.pickDrawCardAfterFail', { gameId, playerId });
+    let game = FakeDB.getGame(gameId);
+    game = Game.setDrawCardToPlayer(game, playerId);
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
   });
 
   socket.on('game.pickDiscardCard', ({ gameId, playerId }) => {
@@ -145,8 +153,16 @@ io.on('connection', socket => {
     FakeDB.saveGame(game);
     // Respond to clients
     sendGameUpdateToClients(game.id);
-    // Send card only to client
-    socket.emit('game.pickedCard', card);
+  });
+
+  socket.on('game.pickFailedCard', ({ gameId, playerId }) => {
+    console.log('game.pickFailedCard', { gameId, playerId });
+    let game = FakeDB.getGame(gameId);
+    game = Game.setPlayerFailedCardBack(game, playerId);
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
   });
 
   // When an user want to put a card in the discard pile
@@ -169,17 +185,8 @@ io.on('connection', socket => {
     }
     // Player throws a wrong card
     else {
-      // Add card from the draw pile to player
-      const [cardToAdd] = game.drawPile;
-      game = Game.removeDrawCard(game);
-      game = Game.addCardToPlayer(game, playerId, cardToAdd);
-
-      // TODO: Reveal a card to anyone
-      // const cardThrown = Game.getCard(game, card);
-      // io.to(game.id).emit('game.card', {
-      //   ...cardThrown,
-      //   ...card
-      // });
+      // Set the card to be visible by everyone
+      game = Game.setPlayerCardToFailedCard(game, playerId, card);
     }
     // Save
     FakeDB.saveGame(game);
