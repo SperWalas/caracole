@@ -1,3 +1,5 @@
+const uuidv4 = require('uuid').v4;
+
 // Constants
 const suits = ['spades', 'diamonds', 'clubs', 'hearts'];
 const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -18,6 +20,7 @@ const getDeck = (withJoker = true) => {
   for (let i = 0; i < suits.length; i++) {
     for (let x = 0; x < values.length; x++) {
       const card = {
+        id: uuidv4(),
         value: values[x],
         suit: suits[i],
         points:
@@ -31,7 +34,7 @@ const getDeck = (withJoker = true) => {
     }
   }
   if (withJoker) {
-    const joker = { value: 'Joker', suit: null, points: 10 };
+    const joker = { id: uuidv4(), value: 'Joker', suit: null, points: 10 };
     deck.push(joker, joker);
   }
 
