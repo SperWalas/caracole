@@ -38,7 +38,7 @@ const setPlayerTmpCard = (game, playerId, card) => {
   const player = players[playerId];
 
   // Next action: Player should throw a card
-  const nextAction = { playerId, action: 'throw' };
+  const nextAction = { player, action: 'throw' };
 
   return {
     ...game,
