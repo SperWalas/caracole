@@ -4,7 +4,14 @@ const Cards = require('./cards');
 
 const addCards = (player, cards) => ({
   ...player,
-  cards
+  cards: cards.map((card, idx) => ({
+    ...card,
+    metadata: {
+      isBeingWatched: false,
+      playerId: null,
+      cardSpot: `player${player.id}_${idx}`
+    }
+  }))
 });
 
 const addCard = (player, cardToAdd, cardIndex) => {
@@ -12,8 +19,29 @@ const addCard = (player, cardToAdd, cardIndex) => {
   const cardSpot = typeof cardIndex !== 'undefined' ? cardIndex : cards.indexOf(null);
   const newCards =
     cardSpot === -1
-      ? [...cards, cardToAdd]
-      : cards.map((card, idx) => (idx === cardSpot ? cardToAdd : card));
+      ? [
+          ...cards,
+          {
+            ...cardToAdd,
+            metadata: {
+              isBeingWatched: false,
+              playerId: null,
+              cardSpot: `player${player.id}_${cards.length}`
+            }
+          }
+        ]
+      : cards.map((card, idx) =>
+          idx === cardSpot
+            ? {
+                ...cardToAdd,
+                metadata: {
+                  isBeingWatched: false,
+                  playerId: null,
+                  cardSpot: `player${player.id}_${cardSpot}`
+                }
+              }
+            : card
+        );
 
   return {
     ...player,
@@ -44,11 +72,11 @@ const create = name => ({
   id: uuidv4(),
   isDealer: false, // The player who distribute the cards
   isReady: false, // Is ready to start a game
-  isWatching: null, // What card the user watching (useful in front) { playerId: String, cardIndex: number }
+  isWatching: false, // Is the user watching a card (useful to know when he's done)
   name,
   order: 0, // The order the players play
   scores: [], // Score of each set,
-  tmpCard: null // Card the player pick (discard or draw pile)
+  tmpCard: null // Card the player pick from discard pile or draw pile
 });
 
 const isDone = player => player.cards.every(card => card === null);
@@ -63,9 +91,36 @@ const replaceCard = (player, cardToReplace) => {
   return {
     ...player,
     tmpCard: null,
-    cards: cards.map((card, index) => (index === cardToReplace.index ? tmpCard : card))
+    cards: cards.map((card, index) =>
+      index === cardToReplace.index
+        ? {
+            ...tmpCard,
+            metadata: {
+              isBeingWatched: false,
+              playerId: null,
+              cardSpot: `player${player.id}_${index}`
+            }
+          }
+        : card
+    )
   };
 };
+
+const setCardIsBeingWatched = (player, cardBeingWatched, playerId) => ({
+  ...player,
+  cards: player.cards.map((card, idx) =>
+    idx === cardBeingWatched.index
+      ? {
+          ...card,
+          metadata: {
+            isBeingWatched: playerId ? true : false,
+            playerId,
+            cardSpot: `player${player.id}_${cardBeingWatched.index}`
+          }
+        }
+      : card
+  )
+});
 
 const setHasDiscoveredHisCards = player => ({
   ...player,
@@ -77,14 +132,23 @@ const setIsReady = (player, isReady = true) => ({
   isReady
 });
 
-const setIsWatching = (player, card = null) => ({
+const setIsWatching = (player, isWatching = false) => ({
   ...player,
-  isWatching: card
+  isWatching
 });
 
 const setTmpCard = (player, tmpCard) => ({
   ...player,
-  tmpCard
+  tmpCard: tmpCard
+    ? {
+        ...tmpCard,
+        metadata: {
+          isBeingWatched: false,
+          playerId: player.id,
+          cardSpot: 'picked-card'
+        }
+      }
+    : null
 });
 
 module.exports = {
@@ -95,6 +159,7 @@ module.exports = {
   isDone,
   removeCard,
   replaceCard,
+  setCardIsBeingWatched,
   setHasDiscoveredHisCards,
   setIsReady,
   setIsWatching,

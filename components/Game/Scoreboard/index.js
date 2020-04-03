@@ -18,8 +18,6 @@ const LoginForm = ({ children, players }) => {
   const closeScoreboard = () => setIsOpen(false);
   const openScoreboard = () => setIsOpen(true);
 
-  console.log({ isOpen });
-
   return (
     <>
       <Overlay onClick={closeScoreboard} isOpen={isOpen}>

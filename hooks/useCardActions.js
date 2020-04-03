@@ -112,7 +112,7 @@ const useCardActions = () => {
       socket.emit('game.watchCard', {
         gameId,
         playerId: selfId,
-        card: { index: cardIndex, cardPlayerId }
+        card: { index: cardIndex, playerId: cardPlayerId }
       });
     }
 
