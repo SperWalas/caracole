@@ -3,6 +3,21 @@ import styled from 'styled-components';
 import theme from '../../theme';
 import { DECK_COLOR, StyledImg } from '../../PlayingCard';
 
+export const FailedCard = styled.div``;
+
+export const DiscardPileWrapper = styled.div`
+  position: relative;
+  width: ${theme.metric.cardWidth};
+  height: 100%;
+
+  ${FailedCard} {
+    position: absolute;
+    top: 30%;
+    left: -20%;
+    transform: rotate(-10deg);
+  }
+`;
+
 export const DrawPile = styled.div`
   position: relative;
   width: ${theme.metric.cardWidth};

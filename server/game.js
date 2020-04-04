@@ -38,7 +38,7 @@ const setPlayerTmpCard = (game, playerId, card) => {
   const player = players[playerId];
 
   // Next action: Player should throw a card
-  const nextAction = { playerId, action: 'throw' };
+  const nextAction = { player, action: 'throw' };
 
   return {
     ...game,
@@ -56,6 +56,7 @@ const create = name => ({
   cardBeingWatched: null,
   discardPile: null, // Trash card pile
   drawPile: null, // Draw card pile
+  failedCard: null, // Wrong card thrown
   id: uuidv4(),
   isReady: false, // Ready when all players are ready
   isStarted: false, // Started when all players have watched his cards
@@ -241,6 +242,19 @@ const setCardToDiscardPile = (game, playerId, card) => {
   };
 };
 
+const setDrawCardToPlayer = (game, playerId) => {
+  const { drawPile, nextActions: oldActions } = game;
+  // Add card from the draw pile to player
+  const [cardToAdd] = drawPile;
+  game = removeDrawCard(game);
+  game = addCardToPlayer(game, playerId, cardToAdd);
+
+  return {
+    ...game,
+    nextActions: oldActions.slice(-1)
+  };
+};
+
 const setTmpCardToDiscardPile = (game, playerId) => {
   console.log('setTmpCardToDiscardPile', {
     playerId
@@ -276,6 +290,45 @@ const setTmpCardToDiscardPile = (game, playerId) => {
     players: {
       ...players,
       [player.id]: Player.setTmpCard(player, null)
+    }
+  };
+};
+
+const setPlayerCardToFailedCard = (game, playerId, cardPosition) => {
+  const { players, nextActions: oldActions } = game;
+  const player = players[playerId];
+
+  const failedCard = getCard(game, cardPosition);
+
+  console.log({ failedCard });
+  // Next action: Player should get his card back
+  const nextAction = {
+    player,
+    action: 'pickFailed'
+  };
+
+  return {
+    ...game,
+    failedCard: { card: failedCard, cardOldPosition: cardPosition },
+    nextActions: [nextAction, ...oldActions],
+    players: {
+      ...players,
+      [playerId]: Player.removeCard(player, cardPosition)
+    }
+  };
+};
+
+const setPlayerFailedCardBack = (game, playerId) => {
+  const { failedCard, nextActions: oldActions, players } = game;
+  const player = players[playerId];
+
+  return {
+    ...game,
+    failedCard: null,
+    nextActions: [{ player, action: 'pickDrawAfterFail' }, ...oldActions.slice(1)],
+    players: {
+      ...players,
+      [playerId]: Player.addCard(player, failedCard.card, failedCard.cardOldPosition.cardIndex)
     }
   };
 };
@@ -414,6 +467,9 @@ module.exports = {
   removeDrawCard,
   setCaracolePlayer,
   setCardToDiscardPile,
+  setDrawCardToPlayer,
+  setPlayerCardToFailedCard,
+  setPlayerFailedCardBack,
   setPlayerHasDiscoveredHisCards,
   setPlayerHasWatched,
   setPlayerIsReady,
