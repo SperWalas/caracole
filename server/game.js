@@ -285,7 +285,17 @@ const setTmpCardToDiscardPile = (game, playerId) => {
 
   return {
     ...game,
-    discardPile: [...discardPile, tmpCard],
+    discardPile: [
+      ...discardPile,
+      {
+        ...tmpCard,
+        metadata: {
+          isBeingWatched: false,
+          playerId: null,
+          cardSpot: 'discard-pile'
+        }
+      }
+    ],
     nextActions: [...nextActions, ...oldActions.slice(1)],
     players: {
       ...players,
@@ -309,7 +319,17 @@ const setPlayerCardToFailedCard = (game, playerId, cardPosition) => {
 
   return {
     ...game,
-    failedCard: { card: failedCard, cardOldPosition: cardPosition },
+    failedCard: {
+      card: {
+        ...failedCard,
+        metadata: {
+          isBeingWatched: false,
+          playerId: null,
+          cardSpot: 'failed-card'
+        }
+      },
+      cardOldPosition: cardPosition
+    },
     nextActions: [nextAction, ...oldActions],
     players: {
       ...players,
@@ -364,12 +384,19 @@ const setPlayerHasDiscoveredHisCards = (game, playerId) => {
 
 const setPlayerHasWatched = game => {
   console.log('setPlayerHasWatched');
-  const { nextActions: oldActions } = game;
+  const { cardBeingWatched, nextActions: oldActions, players } = game;
+  console.log({ cardBeingWatched });
+  const cardPlayer = players[cardBeingWatched.playerId];
 
+  // TODO:
   return {
     ...game,
     cardBeingWatched: null,
-    nextActions: [...oldActions.slice(1)] // Remove last action
+    nextActions: [...oldActions.slice(1)], // Remove last action
+    players: {
+      ...players,
+      [cardPlayer.id]: Player.setCardIsBeingWatched(cardPlayer, cardBeingWatched, null)
+    }
   };
 };
 
@@ -387,11 +414,16 @@ const setPlayerIsReady = (game, playerId) => {
 
 const setPlayerIsWatching = (game, playerId, card) => {
   const { players } = game;
-  const player = players[playerId];
+  console.log({ playerId, card });
+  const cardPlayer = players[card.playerId];
 
   return {
     ...game,
-    cardBeingWatched: { ...card, player }
+    cardBeingWatched: card,
+    players: {
+      ...players,
+      [cardPlayer.id]: Player.setCardIsBeingWatched(cardPlayer, card, playerId)
+    }
   };
 };
 
@@ -424,7 +456,16 @@ const setup = game => {
 
   return {
     ...game,
-    discardPile,
+    discardPile: [
+      {
+        ...discardPile[0],
+        metadata: {
+          isBeingWatched: false,
+          playerId: null,
+          cardSpot: 'discard-pile'
+        }
+      }
+    ],
     drawPile,
     isReady: true,
     isStarted: false,

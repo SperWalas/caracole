@@ -28,13 +28,28 @@ const getDeck = (withJoker = true) => {
             ? Math.min(x + 1, 10)
             : suits[i] === 'spades' || suits[i] === 'clubs'
             ? 20
-            : 0
+            : 0,
+        metadata: {
+          isBeingWatched: false,
+          playerId: null,
+          cardSpot: 'draw-pile'
+        }
       };
       deck.push(card);
     }
   }
   if (withJoker) {
-    const joker = { id: uuidv4(), value: 'Joker', suit: null, points: 10 };
+    const joker = {
+      id: uuidv4(),
+      value: 'Joker',
+      suit: null,
+      points: 10,
+      metadata: {
+        isBeingWatched: false,
+        playerId: null,
+        cardSpot: 'draw-pile'
+      }
+    };
     deck.push(joker, joker);
   }
 
