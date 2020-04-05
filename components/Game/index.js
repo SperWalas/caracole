@@ -7,10 +7,10 @@ import Button from '../Button';
 import DiscardPile from './DiscardPile';
 import useGame from '../../hooks/useGame';
 import useCardActions from '../../hooks/useCardActions';
+import DrawPile from './DrawPile';
 import PickedCard from './PickedCard';
 import PlayerCards from './PlayerCards';
 import Scoreboard from './Scoreboard';
-import { RelativeRow } from './_styled';
 
 const Game = () => {
   const { handleTriggerCaracole, game, selfId, selectedCards, unfoldedCards } = useGame();
@@ -19,7 +19,7 @@ const Game = () => {
     handleHideCard,
     handlePickDrawCard,
     handlePickDrawCardAfterFail,
-    handlePickDiscardCard,
+    handlePickDiscardedCard,
     handlePickFailedCard,
     handlePlayerReady,
     handleThrowTmpCard,
@@ -102,26 +102,34 @@ const Game = () => {
               </>
             )}
           </Column>
-          <RelativeRow justifyContent="center">
+          <Row justifyContent="center" spacing="s4">
             <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
-            <DiscardPile
-              discardPile={isStarted ? discardPile : undefined}
-              failedCard={failedCard}
-              {...(isSelfToPlay &&
-                nextAction === 'pick' && {
-                  onDrawDiscarded: handlePickDiscardCard,
-                  onDrawNew: handlePickDrawCard
-                })}
-              {...(isSelfToPlay &&
-                nextAction === 'pickFailed' && {
-                  onPickFailedCard: handlePickFailedCard
-                })}
-              {...(isSelfToPlay &&
-                nextAction === 'pickDrawAfterFail' && {
-                  onDrawNew: handlePickDrawCardAfterFail
-                })}
-            />
-          </RelativeRow>
+            <Row spacing="s1_5" justifyContent="center">
+              <DiscardPile
+                pickedCard={tmpCard}
+                discardPile={isStarted ? discardPile : undefined}
+                failedCard={failedCard}
+                players={players}
+                {...(isSelfToPlay &&
+                  nextAction === 'pick' && {
+                    onPickDiscardedCard: handlePickDiscardedCard
+                  })}
+                {...(isSelfToPlay &&
+                  nextAction === 'pickFailed' && {
+                    onPickFailedCard: handlePickFailedCard
+                  })}
+              />
+              <DrawPile
+                cards={cards}
+                onDraw={
+                  (isSelfToPlay &&
+                    ((nextAction === 'pick' && handlePickDrawCard) ||
+                      (nextAction === 'pickDrawAfterFail' && handlePickDrawCardAfterFail))) ||
+                  undefined
+                }
+              />
+            </Row>
+          </Row>
           <Row justifyContent="center">
             <Scoreboard players={players}>
               {({ open }) => <Link onClick={open}>see scores</Link>}

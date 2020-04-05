@@ -1,43 +1,13 @@
 import styled from 'styled-components';
 
-import theme from '../../theme';
-import { DECK_COLOR, StyledImg } from '../../PlayingCard';
-
-export const FailedCard = styled.div``;
-
-export const DiscardPileWrapper = styled.div`
-  position: relative;
-  width: ${theme.metric.cardWidth};
-  height: 100%;
-
-  ${FailedCard} {
-    position: absolute;
-    top: 30%;
-    left: -20%;
-    transform: rotate(-10deg);
-  }
+export const FailedCard = styled.div`
+  position: absolute;
+  z-index: 1;
+  top: 30%;
+  left: -20%;
+  transform: rotate(-10deg);
 `;
 
-export const DrawPile = styled.div`
+export const RelativeWrapper = styled.div`
   position: relative;
-  width: ${theme.metric.cardWidth};
-  height: 100%;
-  background: url('/cards/${DECK_COLOR}_back.svg') no-repeat;
-  background-size: 100% 100%;
-  
-  &:before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: inherit;
-    z-index: 0;
-  }
-  
-  ${StyledImg} {
-    position: absolute;
-    top: -5px;
-  }
 `;
