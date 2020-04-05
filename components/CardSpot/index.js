@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
 import theme from '../theme';
@@ -35,10 +35,9 @@ const HiddenPlayingCard = styled(PlayingCard).attrs({ isHidden: true })`
   visibility: hidden;
 `;
 
-// export default StyledCardSpot;
-const CardSpot = ({ label }) => {
+const CardSpot = ({ label, ...rest }, ref) => {
   return (
-    <RelativeWrapper>
+    <RelativeWrapper ref={ref} {...rest}>
       <LabelWrapper>{label}</LabelWrapper>
       {/* Use an invisible card as background to set width and height */}
       <HiddenPlayingCard />
@@ -46,4 +45,4 @@ const CardSpot = ({ label }) => {
   );
 };
 
-export default CardSpot;
+export default forwardRef(CardSpot);

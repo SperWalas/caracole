@@ -5,6 +5,7 @@ import io from 'socket.io-client';
 import { createGlobalStyle } from 'styled-components';
 
 import GameProvider from '../hooks/GameProvider';
+import { CardSpotsProvider } from '../hooks/useCardSpots';
 
 // Override global style to avoid Story height to be 100% of the screen height
 const GlobalStyle = createGlobalStyle`
@@ -51,7 +52,9 @@ class MyApp extends App {
       <>
         <GlobalStyle />
         <GameProvider>
-          <Component {...pageProps} socket={this.state.socket} />
+          <CardSpotsProvider>
+            <Component {...pageProps} socket={this.state.socket} />
+          </CardSpotsProvider>
         </GameProvider>
       </>
     );
