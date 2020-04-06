@@ -456,6 +456,7 @@ const setup = game => {
 
   return {
     ...game,
+    cards: shuffledDeck,
     discardPile: [
       {
         ...discardPile[0],

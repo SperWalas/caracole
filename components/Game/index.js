@@ -28,7 +28,16 @@ const Game = () => {
     nextPlayer
   } = useCardActions();
 
-  const { cardBeingWatched, discardPile, failedCard, name, players, isReady, isStarted } = game;
+  const {
+    cards,
+    cardBeingWatched,
+    discardPile,
+    failedCard,
+    name,
+    players,
+    isReady,
+    isStarted
+  } = game;
 
   const selfPlayer = Object.values(players).find(p => p.id === selfId) || {};
   const otherPlayers = Object.values(players).filter(p => p.id !== selfId) || [];
