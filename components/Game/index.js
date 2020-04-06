@@ -15,12 +15,12 @@ import Scoreboard from './Scoreboard';
 const Game = () => {
   const { handleTriggerCaracole, game, selfId, selectedCards, unfoldedCards } = useGame();
   const {
-    handleCardClick,
     handleHideCard,
     handlePickDrawCard,
     handlePickDrawCardAfterFail,
     handlePickDiscardedCard,
     handlePickFailedCard,
+    handlePlayerCardClick,
     handlePlayerReady,
     handleThrowTmpCard,
     isSelfToPlay,
@@ -62,7 +62,7 @@ const Game = () => {
           cardPlayerId={player.id}
           cards={player.cards}
           onCardHide={handleHideCard}
-          onCardPick={handleCardClick}
+          onCardPick={handlePlayerCardClick}
           selectedCards={selectedCards}
           shouldRevealAllCards={!isReady}
           unfoldedCards={unfoldedCards}
