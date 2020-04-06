@@ -13,6 +13,7 @@ const SUIT_LETTER = {
 };
 
 export const StyledImg = styled.img`
+  display: block;
   width: ${theme.metric.cardWidth};
   height: calc(${theme.metric.cardWidth} * 1.4);
   border-radius: ${theme.metric.borderRadius};
@@ -41,7 +42,7 @@ export const StyledImg = styled.img`
 `;
 
 const PlayingCard = ({ card, isHidden, ...rest }) => {
-  if (isHidden) {
+  if (isHidden || !card) {
     return <StyledImg {...rest} src={`/cards/${DECK_COLOR}_back.svg`} />;
   }
 
