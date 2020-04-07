@@ -143,8 +143,8 @@ io.on('connection', socket => {
     sendGameUpdateToClients(gameId);
   });
 
-  socket.on('game.pickDiscardCard', ({ gameId, playerId }) => {
-    console.log('game.pickDiscardCard', { gameId, playerId });
+  socket.on('game.pickDiscardedCard', ({ gameId, playerId }) => {
+    console.log('game.pickDiscardedCard', { gameId, playerId });
     let game = FakeDB.getGame(gameId);
     const [card] = game.discardPile.slice(-1);
     game = Game.removeDiscardCard(game);

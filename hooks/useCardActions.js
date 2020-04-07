@@ -84,9 +84,9 @@ const useCardActions = () => {
     socket.emit('game.pickDrawCardAfterFail', { gameId, playerId: selfId });
   };
 
-  const handlePickDiscardCard = () => {
-    console.log('handlePickDiscardCard');
-    socket.emit('game.pickDiscardCard', { gameId, playerId: selfId });
+  const handlePickDiscardedCard = () => {
+    console.log('handlePickDiscardedCard');
+    socket.emit('game.pickDiscardedCard', { gameId, playerId: selfId });
   };
 
   const handlePickFailedCard = () => {
@@ -119,7 +119,7 @@ const useCardActions = () => {
     revealCard(cardIndex, cardPlayerId);
   };
 
-  const handleCardClick = (cardIndex, cardPlayerId) => {
+  const handlePlayerCardClick = (cardIndex, cardPlayerId) => {
     const isSelf = cardPlayerId === selfId;
 
     // Game hasn't start
@@ -150,12 +150,12 @@ const useCardActions = () => {
   };
 
   return {
-    handleCardClick,
     handleHideCard,
     handlePickDrawCard,
     handlePickDrawCardAfterFail,
-    handlePickDiscardCard,
+    handlePickDiscardedCard,
     handlePickFailedCard,
+    handlePlayerCardClick,
     handlePlayerReady,
     handleThrowTmpCard,
     isSelfToPlay,

@@ -1,15 +1,15 @@
 import React from 'react';
 
-import PlayingCard from '../../PlayingCard';
-import { PickedCardWrapper } from './_styled';
+import useCardSpots, { PICKED_CARD_SPOT_ID } from '../../../hooks/useCardSpots';
+import CardSpot from '../../CardSpot';
 
-const PickedCard = ({ card, className, onClick }) => {
+const PickedCard = ({ onClick }) => {
+  const { setCardSpotRef } = useCardSpots();
+
   return (
-    card && (
-      <PickedCardWrapper>
-        <PlayingCard className={className} card={card} onClick={onClick} />
-      </PickedCardWrapper>
-    )
+    <div ref={setCardSpotRef(PICKED_CARD_SPOT_ID)}>
+      <CardSpot style={{ opacity: 0 }} onClick={onClick} />
+    </div>
   );
 };
 
