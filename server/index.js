@@ -71,43 +71,33 @@ io.on('connection', socket => {
     }
   });
 
-  // When a user saw his cards at the begin of the game
-  socket.on('game.hasDiscoveredHisCards', ({ gameId, playerId }) => {
+  socket.on('game.playerGiveCard', ({ gameId, playerId, cardId }) => {
     let game = FakeDB.getGame(gameId);
-    // Update player, if all players have seen their cards, start the game
-    game = Game.setPlayerHasDiscoveredHisCards(game, playerId);
-    // Save
-    FakeDB.saveGame(game);
-    // Respond to clients that player is looking to a card
-    sendGameUpdateToClients(gameId);
-  });
-
-  // When a user set itself as ready
-  socket.on('game.setPlayerReady', ({ gameId, playerId }) => {
-    let game = FakeDB.getGame(gameId);
-    game = Game.setPlayerIsReady(game, playerId);
-    // When all player are ready, start the game
-    if (Game.canStart(game)) {
-      game = Game.setup(game);
+    // Give card to someone (playerToAddACard is in the nextActions of the game)
+    game = Game.givePlayerCard(game, playerId, cardId);
+    // Check if game is done
+    if (Game.isDone(game)) {
+      game = Game.end(game);
     }
-    // Save
-    FakeDB.saveGame(game);
-    sendGameUpdateToClients(gameId);
-  });
-
-  // When an user confirm he has seen the card
-  socket.on('game.watchCard', ({ gameId, playerId, card }) => {
-    let game = FakeDB.getGame(gameId);
-    // Add card to player as watching
-    game = Game.setPlayerIsWatching(game, playerId, card);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
     sendGameUpdateToClients(gameId);
   });
 
-  // When an user confirm he has seen the card
-  socket.on('game.hasWatchedCard', ({ gameId }) => {
+  // When an player is wathcing a card
+  socket.on('game.playerWatchCard', ({ gameId, cardId, playerId }) => {
+    let game = FakeDB.getGame(gameId);
+    // Set the card is being watched
+    game = Game.setCardIsBeingWatchedBy(game, playerId, cardId);
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
+  });
+
+  // When an player confirm he has seen the card
+  socket.on('game.playerHasWatchedCard', ({ gameId }) => {
     let game = FakeDB.getGame(gameId);
     // Set has discover if game is still in discovery mode (beginning of the game)
     game = Game.setPlayerHasWatched(game);
@@ -121,20 +111,43 @@ io.on('connection', socket => {
     sendGameUpdateToClients(gameId);
   });
 
-  socket.on('game.pickDrawCard', ({ gameId, playerId }) => {
-    console.log('game.pickDrawCard', { gameId, playerId });
+  // When a player saw his cards at the begin of the game
+  socket.on('game.playerHasDiscoveredHisCards', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
-    const [card] = game.drawPile;
-    game = Game.removeDrawCard(game);
-    game = Game.setPlayerTmpCard(game, playerId, card);
+    // Update player, if all players have seen their cards, start the game
+    game = Game.setPlayerHasDiscoveredHisCards(game, playerId);
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients that player is looking to a card
+    sendGameUpdateToClients(gameId);
+  });
+
+  // When a user set itself as ready
+  socket.on('game.playerIsReady', ({ gameId, playerId }) => {
+    let game = FakeDB.getGame(gameId);
+    game = Game.setPlayerIsReady(game, playerId);
+    // When all player are ready, start the game
+    if (Game.canStart(game)) {
+      game = Game.setup(game);
+    }
+    // Save
+    FakeDB.saveGame(game);
+    sendGameUpdateToClients(gameId);
+  });
+
+  // When a player pick a card in the draw pile
+  socket.on('game.playerPickDrawCard', ({ gameId, playerId }) => {
+    let game = FakeDB.getGame(gameId);
+    const [drawCard] = game.drawPile;
+    game = Game.removeDrawCard(game, drawCard.id);
+    game = Game.setCardAsPickedCard(game, playerId, drawCard.id);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
     sendGameUpdateToClients(gameId);
   });
 
-  socket.on('game.pickDrawCardAfterFail', ({ gameId, playerId }) => {
-    console.log('game.pickDrawCardAfterFail', { gameId, playerId });
+  socket.on('game.playerPickDrawCardAfterFail', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
     game = Game.setDrawCardToPlayer(game, playerId);
     // Save
@@ -143,22 +156,20 @@ io.on('connection', socket => {
     sendGameUpdateToClients(gameId);
   });
 
-  socket.on('game.pickDiscardedCard', ({ gameId, playerId }) => {
-    console.log('game.pickDiscardedCard', { gameId, playerId });
+  socket.on('game.playerPickDiscardCard', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
-    const [card] = game.discardPile.slice(-1);
+    const [discardCard] = game.discardPile.slice(-1);
     game = Game.removeDiscardCard(game);
-    game = Game.setPlayerTmpCard(game, playerId, card);
+    game = Game.setCardAsPickedCard(game, playerId, discardCard.id);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
     sendGameUpdateToClients(game.id);
   });
 
-  socket.on('game.pickFailedCard', ({ gameId, playerId }) => {
-    console.log('game.pickFailedCard', { gameId, playerId });
+  socket.on('game.playerPickFailedCard', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
-    game = Game.setPlayerFailedCardBack(game, playerId);
+    game = Game.setFailedCardToPlayer(game, playerId);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
@@ -166,27 +177,26 @@ io.on('connection', socket => {
   });
 
   // When an user want to put a card in the discard pile
-  socket.on('game.throwCard', ({ gameId, playerId, card }) => {
+  socket.on('game.playerThrowCard', ({ gameId, playerId, cardId }) => {
     let game = FakeDB.getGame(gameId);
-    const { players } = game;
-    const player = players[playerId];
+    const { nextActions } = game;
+    const [currentAction] = nextActions;
 
-    // If player has a tmpCard and throw one of his card
-    if (player.tmpCard && playerId === card.playerId) {
-      game = Game.setCardToDiscardPile(game, playerId, card);
+    if (currentAction.player.id === playerId && currentAction.action === 'throw') {
+      game = Game.setCardToDiscardPileAndReplaceByPickedCard(game, playerId, cardId);
       // Check if game is done
       if (Game.isDone(game)) {
         game = Game.end(game);
       }
     }
     // If a player throws his or someone's card
-    else if (Game.isCardCanBeThrown(game, card)) {
-      game = Game.setCardToDiscardPile(game, playerId, card);
+    else if (Game.isCardCanBeThrown(game, cardId)) {
+      game = Game.setCardToDiscardPile(game, playerId, cardId);
     }
     // Player throws a wrong card
     else {
       // Set the card to be visible by everyone
-      game = Game.setPlayerCardToFailedCard(game, playerId, card);
+      game = Game.setCardAsFailedCard(game, playerId, cardId);
     }
     // Save
     FakeDB.saveGame(game);
@@ -194,9 +204,22 @@ io.on('connection', socket => {
     sendGameUpdateToClients(gameId);
   });
 
-  socket.on('game.triggerCaracole', ({ gameId, playerId }) => {
+  socket.on('game.playerThrowPickedCard', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
     // Set tmp card to discardPile
+    game = Game.setPickedCardToDiscardPile(game, playerId);
+    // Check if game is done
+    if (Game.isDone(game)) {
+      game = Game.end(game);
+    }
+    // Save
+    FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
+  });
+
+  socket.on('game.playerTriggerCaracole', ({ gameId, playerId }) => {
+    let game = FakeDB.getGame(gameId);
     game = Game.setCaracolePlayer(game, playerId);
     // Save
     FakeDB.saveGame(game);
@@ -204,36 +227,7 @@ io.on('connection', socket => {
     sendGameUpdateToClients(gameId);
   });
 
-  socket.on('game.throwTmpCard', ({ gameId, playerId }) => {
-    let game = FakeDB.getGame(gameId);
-    // Set tmp card to discardPile
-    game = Game.setTmpCardToDiscardPile(game, playerId);
-    // Check if game is done
-    if (Game.isDone(game)) {
-      game = Game.end(game);
-    }
-    // Save
-    FakeDB.saveGame(game);
-    // Respond to clients
-    sendGameUpdateToClients(gameId);
-  });
-
-  socket.on('game.giveCard', ({ gameId, playerId, card }) => {
-    let game = FakeDB.getGame(gameId);
-    // Give card to someone (playerToAddACard is in the nextActions of the game)
-    game = Game.givePlayerCard(game, playerId, card);
-    // Check if game is done
-    if (Game.isDone(game)) {
-      game = Game.end(game);
-    }
-    // Save
-    FakeDB.saveGame(game);
-    // Respond to clients
-    sendGameUpdateToClients(gameId);
-  });
-
-  socket.on('game.swapCard', ({ gameId, cards }) => {
-    console.log('swapCard', { cards });
+  socket.on('game.swapCardBetweenPlayer', ({ gameId, cards }) => {
     let game = FakeDB.getGame(gameId);
     // Give card to someone (playerToAddACard is in the nextActions of the game)
     game = Game.swapPlayersCards(game, cards);

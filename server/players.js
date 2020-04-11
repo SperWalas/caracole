@@ -40,17 +40,18 @@ const calcScores = (playersCollection, caracolePlayer) => {
   }, {});
 };
 
-const distributeCards = (playersCollection, cardsToDistribute) => {
-  const nbrPerPlayer = cardsToDistribute.length / getCount(playersCollection);
+const distributeCards = (playersCollection, cards) => {
   const players = Object.values(playersCollection);
-
-  return players.reduce((playersWithCards, player, idx) => {
-    const cards = cardsToDistribute.slice(nbrPerPlayer * idx, nbrPerPlayer * (idx + 1));
-    return {
-      ...playersWithCards,
-      [player.id]: Player.addCards(player, cards)
-    };
-  }, {});
+  return players.reduce(
+    (playersPopulated, player) => ({
+      ...playersPopulated,
+      [player.id]: {
+        ...player,
+        cards: cards.filter(card => card.belongsTo === player.id)
+      }
+    }),
+    {}
+  );
 };
 
 const getCount = playersCollection => Object.keys(playersCollection).length;
