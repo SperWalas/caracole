@@ -11,6 +11,7 @@ const useCardActions = () => {
   const {
     discoveredCardsCount,
     game,
+    handlePlayerHasDiscoveredHisCards,
     hideCard,
     resetCards,
     revealCard,
@@ -18,6 +19,7 @@ const useCardActions = () => {
     selectCard,
     selectedCards,
     selectedCardsCount,
+    unfoldedCards,
     unfoldedCardsCount
   } = useGame();
   const { id: gameId, nextActions, isStarted } = game;
@@ -26,138 +28,163 @@ const useCardActions = () => {
   const nextPlayer = nextActions.length && nextActions[0] && nextActions[0].player;
   const isSelfToPlay = nextPlayer && nextPlayer.id === selfId;
 
+  console.log('render');
+
   // Swap cards when 2 are selected
   useEffect(() => {
     if (selectedCardsCount === 2) {
-      handleSwapCard();
-      resetCards({});
+      handleSwapCards(selectedCards);
+      resetCards();
     }
   }, [selectedCardsCount]);
 
-  const handleGiveCard = (cardIndex, cardPlayerId) => {
-    console.log('handleGiveCard');
-    const card = { index: cardIndex, playerId: cardPlayerId };
-    socket.emit('game.giveCard', { gameId: game.id, playerId: selfId, card });
-  };
+  const handleCardClick = card => {
+    console.log('handleCardClick');
+    const isSelf = card.belongsTo === selfId;
 
-  const handleSwapCard = () => {
-    const cardPlayerIds = Object.keys(selectedCards);
-    if (cardPlayerIds.length === 2) {
-      const cards = cardPlayerIds.map(cardPlayerId => ({
-        index: selectedCards[cardPlayerId],
-        playerId: cardPlayerId
-      }));
-      socket.emit('game.swapCard', { gameId, cards });
-    }
-  };
-
-  const handleHideCard = (cardIndex, cardPlayerId) => {
-    console.log('handleHideCard');
-
-    // Tell the world the card has been watched
-    if (isStarted) {
-      socket.emit('game.hasWatchedCard', { gameId, playerId: selfId });
-    }
-
-    // Tell if the player has discovered his 2 cards
-    if (!isStarted && unfoldedCardsCount === 1 && discoveredCardsCount === DISCOVERY_CARDS_COUNT) {
-      socket.emit('game.hasDiscoveredHisCards', { gameId, playerId: selfId });
-    }
-
-    hideCard(cardIndex, cardPlayerId);
-  };
-
-  const handlePlayerReady = () => {
-    console.log({ gameId, selfId });
-    // Ready to start/reboot the game reset data
-    socket.emit('game.setPlayerReady', { gameId, playerId: selfId });
-    resetCards();
-  };
-
-  const handlePickDrawCard = () => {
-    console.log('handlePickDrawCard');
-    socket.emit('game.pickDrawCard', { gameId, playerId: selfId });
-  };
-
-  const handlePickDrawCardAfterFail = () => {
-    console.log('pickDrawCardAfterFail');
-    socket.emit('game.pickDrawCardAfterFail', { gameId, playerId: selfId });
-  };
-
-  const handlePickDiscardedCard = () => {
-    console.log('handlePickDiscardedCard');
-    socket.emit('game.pickDiscardedCard', { gameId, playerId: selfId });
-  };
-
-  const handlePickFailedCard = () => {
-    console.log('handlePickFailedCard');
-    socket.emit('game.pickFailedCard', { gameId, playerId: selfId });
-  };
-
-  const handleThrowTmpCard = () => {
-    socket.emit('game.throwTmpCard', { gameId, playerId: selfId });
-  };
-
-  const handleThrowHandCard = (cardIndex, cardPlayerId) => {
-    console.log('handleThrowHandCard', { cardIndex, cardPlayerId });
-    const card = { index: cardIndex, playerId: cardPlayerId };
-    socket.emit('game.throwCard', { gameId, playerId: selfId, card });
-  };
-
-  const handleWatchCard = (cardIndex, cardPlayerId) => {
-    console.log('handleWatchCard');
-
-    // Send to back that player is looking a card
-    if (isStarted) {
-      socket.emit('game.watchCard', {
-        gameId,
-        playerId: selfId,
-        card: { index: cardIndex, playerId: cardPlayerId }
-      });
-    }
-
-    revealCard(cardIndex, cardPlayerId);
-  };
-
-  const handlePlayerCardClick = (cardIndex, cardPlayerId) => {
-    const isSelf = cardPlayerId === selfId;
-
-    // Game hasn't start
     if (!isStarted) {
-      // Player can only watch their own cards
-      if (isSelf && discoveredCardsCount < DISCOVERY_CARDS_COUNT) {
-        return handleWatchCard(cardIndex, cardPlayerId);
+      // Player can only watch their own cards at the beginning
+      if (isSelf) {
+        const isCardRevealed = !!unfoldedCards.find(unfoldedCard => unfoldedCard.id === card.id);
+        if (isCardRevealed) {
+          if (unfoldedCardsCount === 1 && discoveredCardsCount === DISCOVERY_CARDS_COUNT) {
+            handlePlayerHasDiscoveredHisCards();
+          }
+          return hideCard(card);
+        }
+
+        // Discover his own card
+        if (discoveredCardsCount < DISCOVERY_CARDS_COUNT) {
+          return revealCard(card);
+        }
       }
-      // Don't do anything
+      // Don't do anything else
       return;
     }
 
     // Game started it's player turn
     if (isSelfToPlay) {
-      // Can only watch one card at a time
-      if (nextAction === 'watch' && !unfoldedCardsCount) {
-        return handleWatchCard(cardIndex, cardPlayerId);
+      if (nextAction === 'give' && isSelf) {
+        return handleGiveCard(card);
       }
-      if (nextAction === 'give' && cardPlayerId === selfId) {
-        return handleGiveCard(cardIndex, cardPlayerId);
+      // If player has to pick
+      if (nextAction === 'pick' && card.spot === 'draw-pile') {
+        return handlePickDrawCard();
       }
+
+      if (nextAction === 'pick' && card.spot === 'discard-pile') {
+        return handlePickDiscardCard();
+      }
+
+      if (nextAction === 'pickFailed' && card.spot === 'failed-card') {
+        return handlePickFailedCard();
+      }
+
+      if (nextAction === 'pickDrawAfterFail' && card.spot === 'draw-pile') {
+        return handlePickDrawCardAfterFail();
+      }
+
       if (nextAction === 'exchange' || nextAction === 'swap') {
-        return selectCard(cardIndex, cardPlayerId, nextAction);
+        return selectCard(card, nextAction);
+      }
+
+      if (nextAction === 'throw' && card.spot === 'picked-card') {
+        return handleThrowPickedCard();
+      }
+
+      if (nextAction === 'watch') {
+        console.log({ unfoldedCardsCount });
+        return !unfoldedCardsCount ? handleWatchCard(card) : handleHasWatchedCard(card);
       }
     }
     // No action? the player want to throw the card then
-    return handleThrowHandCard(cardIndex, cardPlayerId);
+    return handleThrowCard(card);
+  };
+
+  const handleGiveCard = ({ id: cardId }) => {
+    console.log('handleGiveCard');
+    socket.emit('game.playerGiveCard', {
+      gameId: game.id,
+      playerId: selfId,
+      cardId
+    });
+  };
+
+  const handleHasWatchedCard = card => {
+    console.log('handleHasWatchedCard');
+    socket.emit('game.playerHasWatchedCard', { gameId, playerId: selfId });
+    hideCard(card);
+  };
+
+  const handlePickDiscardCard = () => {
+    console.log('handlePickDiscardCard');
+    socket.emit('game.playerPickDiscardCard', {
+      gameId,
+      playerId: selfId
+    });
+  };
+
+  const handlePickDrawCard = () => {
+    console.log('handlePickDrawCard');
+    socket.emit('game.playerPickDrawCard', {
+      gameId,
+      playerId: selfId
+    });
+  };
+
+  const handlePickDrawCardAfterFail = () => {
+    console.log('handlePickDrawCardAfterFail');
+    socket.emit('game.playerPickDrawCardAfterFail', {
+      gameId,
+      playerId: selfId
+    });
+  };
+
+  const handlePickFailedCard = () => {
+    console.log('handlePickFailedCard');
+    socket.emit('game.playerPickFailedCard', {
+      gameId,
+      playerId: selfId
+    });
+  };
+
+  const handleSwapCards = cards => {
+    console.log('handleSwapCards');
+    socket.emit('game.swapCardBetweenPlayer', {
+      gameId,
+      cards: cards.map(card => card.id)
+    });
+  };
+
+  const handleThrowCard = ({ id: cardId }) => {
+    console.log('handleThrowCard');
+    socket.emit('game.playerThrowCard', {
+      gameId,
+      playerId: selfId,
+      cardId
+    });
+  };
+
+  const handleThrowPickedCard = () => {
+    console.log('handleThrowPickedCard');
+    socket.emit('game.playerThrowPickedCard', {
+      gameId,
+      playerId: selfId
+    });
+  };
+
+  const handleWatchCard = card => {
+    console.log('handleWatchCard');
+    socket.emit('game.playerWatchCard', {
+      gameId,
+      playerId: selfId,
+      cardId: card.id
+    });
+    revealCard(card);
   };
 
   return {
-    handleHideCard,
-    handlePickDrawCard,
-    handlePickDrawCardAfterFail,
-    handlePickDiscardedCard,
-    handlePickFailedCard,
-    handlePlayerCardClick,
-    handlePlayerReady,
-    handleThrowTmpCard,
+    handleCardClick,
     isSelfToPlay,
     nextAction,
     nextPlayer

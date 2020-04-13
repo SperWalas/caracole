@@ -1,16 +1,13 @@
 import React, { useRef, useEffect, useState, memo } from 'react';
-import { animated, useSpring } from 'react-spring';
+import { useSpring } from 'react-spring';
 import { useWindowSize } from 'react-use';
 
-import useCardSpots, {
-  DRAW_PILE_SPOT_ID,
-  DISCARD_PILE_SPOT_ID,
-  PICKED_CARD_SPOT_ID
-} from '../../hooks/useCardSpots';
+import useCardSpots, { DRAW_PILE_SPOT_ID } from '../../hooks/useCardSpots';
 import PlayingCard from '../PlayingCard';
 import { getNodesOffset } from './helpers';
+import { StyledAnimatedDiv } from './_styled';
 
-const AnimatedPlayingCard = ({ card, ...rest }) => {
+const AnimatedPlayingCard = ({ card }) => {
   const cardRef = useRef();
   const { cardSpots, getSpotNode } = useCardSpots();
   const { width, height } = useWindowSize();
@@ -32,26 +29,10 @@ const AnimatedPlayingCard = ({ card, ...rest }) => {
     to: { transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` }
   });
 
-  const isInDiscardPile = cardSpot === DISCARD_PILE_SPOT_ID;
-  const isInDrawPile = cardSpot === DRAW_PILE_SPOT_ID;
-  const isPickedCard = cardSpot === PICKED_CARD_SPOT_ID;
-
-  const isCardVisible = (isInDiscardPile || isPickedCard) && !isInDrawPile;
-
   return (
-    <animated.div ref={cardRef} style={animatedStyle}>
-      <PlayingCard
-        card={isInDrawPile ? null : card}
-        isHidden={isInDrawPile}
-        style={{
-          // Delegate click to card spot
-          pointerEvents: 'none',
-          // TEMP debug mode
-          ...(!isCardVisible && { opacity: 0.2 })
-        }}
-        {...rest}
-      />
-    </animated.div>
+    <StyledAnimatedDiv ref={cardRef} style={animatedStyle}>
+      <PlayingCard card={card} />
+    </StyledAnimatedDiv>
   );
 };
 

@@ -1,11 +1,13 @@
 import styled from 'styled-components';
 
-export const FailedCard = styled.div`
+import CardSpot from '../../CardSpot';
+
+export const FailedCard = styled(CardSpot)`
   position: absolute;
   z-index: 1;
   top: 30%;
   left: -20%;
-  transform: rotate(-10deg);
+  opacity: 0;
 `;
 
 export const RelativeWrapper = styled.div`

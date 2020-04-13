@@ -13,36 +13,13 @@ import PlayerCards from './PlayerCards';
 import Scoreboard from './Scoreboard';
 
 const Game = () => {
-  const { handleTriggerCaracole, game, selfId, selectedCards, unfoldedCards } = useGame();
-  const {
-    handleHideCard,
-    handlePickDrawCard,
-    handlePickDrawCardAfterFail,
-    handlePickDiscardedCard,
-    handlePickFailedCard,
-    handlePlayerCardClick,
-    handlePlayerReady,
-    handleThrowTmpCard,
-    isSelfToPlay,
-    nextAction,
-    nextPlayer
-  } = useCardActions();
+  const { handlePlayerIsReady, handlePlayerTriggerCaracole, game, selfId } = useGame();
+  const { nextAction, nextPlayer } = useCardActions();
 
-  const {
-    cards,
-    cardBeingWatched,
-    discardPile,
-    failedCard,
-    name,
-    players,
-    isReady,
-    isStarted
-  } = game;
+  const { cards, discardPile, drawPile, name, players, isReady, isStarted } = game;
 
   const selfPlayer = Object.values(players).find(p => p.id === selfId) || {};
   const otherPlayers = Object.values(players).filter(p => p.id !== selfId) || [];
-
-  const { tmpCard } = selfPlayer;
 
   const renderPlayerDeck = (player, key) => {
     const isPlayerToPlay = nextPlayer && nextPlayer.id === player.id;
@@ -57,18 +34,9 @@ const Game = () => {
           </Subheading>
         </Row>
 
-        <PlayerCards
-          cardBeingWatched={!isSelfToPlay ? cardBeingWatched : null}
-          cardPlayerId={player.id}
-          cards={player.cards}
-          onCardHide={handleHideCard}
-          onCardPick={handlePlayerCardClick}
-          selectedCards={selectedCards}
-          shouldRevealAllCards={!isReady}
-          unfoldedCards={unfoldedCards}
-        />
+        <PlayerCards player={player} />
         {!!canCaracole && isReady && (
-          <Button onClick={() => handleTriggerCaracole(player)}>Caracoler !</Button>
+          <Button onClick={() => handlePlayerTriggerCaracole(player)}>Caracoler !</Button>
         )}
 
         {!isReady && (
@@ -76,7 +44,7 @@ const Game = () => {
             {player.isReady ? (
               <Body>Ready</Body>
             ) : isSelf ? (
-              <Button onClick={handlePlayerReady}>Let’s go !</Button>
+              <Button onClick={handlePlayerIsReady}>Let’s go !</Button>
             ) : (
               <Body>Not ready yet…</Body>
             )}
@@ -112,31 +80,10 @@ const Game = () => {
             )}
           </Column>
           <Row justifyContent="center" spacing="s4">
-            <PickedCard card={tmpCard} onClick={handleThrowTmpCard} />
+            <PickedCard />
             <Row spacing="s1_5" justifyContent="center">
-              <DiscardPile
-                pickedCard={tmpCard}
-                discardPile={isStarted ? discardPile : undefined}
-                failedCard={failedCard}
-                players={players}
-                {...(isSelfToPlay &&
-                  nextAction === 'pick' && {
-                    onPickDiscardedCard: handlePickDiscardedCard
-                  })}
-                {...(isSelfToPlay &&
-                  nextAction === 'pickFailed' && {
-                    onPickFailedCard: handlePickFailedCard
-                  })}
-              />
-              <DrawPile
-                cards={cards}
-                onDraw={
-                  (isSelfToPlay &&
-                    ((nextAction === 'pick' && handlePickDrawCard) ||
-                      (nextAction === 'pickDrawAfterFail' && handlePickDrawCardAfterFail))) ||
-                  undefined
-                }
-              />
+              <DiscardPile />
+              <DrawPile cards={cards} drawPile={drawPile} discardPile={discardPile} />
             </Row>
           </Row>
           <Row justifyContent="center">

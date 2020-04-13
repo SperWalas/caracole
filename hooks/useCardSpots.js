@@ -11,7 +11,7 @@ export const getPlayerCardSpotId = (playerId, spotIndex) => `player${playerId}_$
 const CardSpotsContext = createContext(null);
 
 export const CardSpotsProvider = ({ children }) => {
-  const { game, selfId } = useGame();
+  const { game } = useGame();
   const [cardSpots, setCardSpots] = useState({}); // { [cardId]: spotId }
   const cardSpotsRef = useRef({}); // { [spotId]: HTLMElement }
 
@@ -24,46 +24,21 @@ export const CardSpotsProvider = ({ children }) => {
     [cardSpotsRef]
   );
 
-  const { cards, discardPile, failedCard, players } = game || {};
+  const { cards } = game || {};
 
   useEffect(() => {
     if (cards) {
-      // Flatten player cards in a object { [cardId]: spotId }
-      const playerCardSpots = Object.values(players).reduce(
-        (playersAcc, { cards, id: playerID }) => {
-          const singlePlayerCardSpots = cards.reduce((cardsAcc, card, spotIndex) => {
-            return {
-              ...cardsAcc,
-              ...(card && { [card.id]: getPlayerCardSpotId(playerID, spotIndex) })
-            };
-          }, {});
-
-          return {
-            ...playersAcc,
-            ...singlePlayerCardSpots
-          };
-        },
-        {}
+      setCardSpots(
+        cards.reduce(
+          (cardSpots, card) => ({
+            ...cardSpots,
+            [card.id]: card.spot
+          }),
+          {}
+        )
       );
-
-      const discardedCard = discardPile && [...discardPile].pop();
-      const { tmpCard: pickedCard } = Object.values(players).find(p => p.id === selfId) || {};
-
-      const drawPileCards = Object.values(cards || []).reduce(
-        (acc, { id }) => ({ ...acc, [id]: DRAW_PILE_SPOT_ID }),
-        {}
-      );
-
-      const newCardSpots = {
-        ...drawPileCards,
-        ...playerCardSpots,
-        ...(discardedCard && { [discardedCard.id]: DISCARD_PILE_SPOT_ID }),
-        ...(failedCard && { [failedCard.id]: FAILED_CARD_SPOT_ID }),
-        ...(pickedCard && { [pickedCard.id]: PICKED_CARD_SPOT_ID })
-      };
-      setCardSpots(newCardSpots);
     }
-  }, [discardPile, players]);
+  }, [cards]);
 
   const value = {
     cardSpots,

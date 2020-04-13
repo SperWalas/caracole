@@ -1,7 +1,14 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
 
-import theme from '../theme';
+import useCardActions from '../../hooks/useCardActions';
+import useCardSpots, {
+  DISCARD_PILE_SPOT_ID,
+  DRAW_PILE_SPOT_ID,
+  FAILED_CARD_SPOT_ID,
+  PICKED_CARD_SPOT_ID
+} from '../../hooks/useCardSpots';
+import useGame from '../../hooks/useGame';
+import { PlayingCardWrapper, PlayingCardInner, StyledImg, FrontCard } from './_styled';
 
 export const DECK_COLOR = 'blue'; // 'blue' | 'red'
 
@@ -12,45 +19,43 @@ const SUIT_LETTER = {
   spades: 'S'
 };
 
-export const StyledImg = styled.img`
-  display: block;
-  width: ${theme.metric.cardWidth};
-  height: calc(${theme.metric.cardWidth} * 1.4);
-  border-radius: ${theme.metric.borderRadius};
+const PlayingCard = ({ card, className }) => {
+  const { cardSpots } = useCardSpots();
+  const { handleCardClick, isSelfToPlay } = useCardActions();
+  const { game, selectedCards, unfoldedCards } = useGame();
 
-  ${props =>
-    props.onClick &&
-    css`
-      cursor: pointer;
-      transition: all ${theme.animation.timing} ${theme.animation.easing};
-
-      &:hover {
-        box-shadow: 2px 8px 10px ${theme.color.shadow};
-        transform: translateY(-3px);
-      }
-    `};
-
-  ${props =>
-    props.isSelected &&
-    css`
-      box-shadow: 0 0 2px 2px ${theme.color.governorBay};
-
-      &:hover {
-        box-shadow: 0 0 2px 2px ${theme.color.governorBay}, 2px 8px 10px ${theme.color.shadow};
-      }
-    `};
-`;
-
-const PlayingCard = ({ card, isHidden, ...rest }) => {
-  if (isHidden || !card) {
-    return <StyledImg {...rest} src={`/cards/${DECK_COLOR}_back.svg`} />;
-  }
-
-  const { value, suit } = card;
+  const { id, suit, value } = card;
   const suitLetter = SUIT_LETTER[suit];
   const cardId = value === 'Joker' ? 'joker' : `${value}${suitLetter}`;
 
-  return <StyledImg {...rest} src={`/cards/${cardId}.svg`} />;
+  const cardSpot = cardSpots[id];
+  const isFailedCard = cardSpot === FAILED_CARD_SPOT_ID;
+  const isInDiscardPile = cardSpot === DISCARD_PILE_SPOT_ID;
+  const isInDrawPile = cardSpot === DRAW_PILE_SPOT_ID;
+  const isPickedCard = cardSpot === PICKED_CARD_SPOT_ID;
+  const isSelected = !!selectedCards.find(selectedCard => selectedCard.id === id);
+  const isUnfolded = !!unfoldedCards.find(unfoldedCard => unfoldedCard.id === id);
+
+  const isCardVisible =
+    ((isInDiscardPile || isUnfolded || isFailedCard) && !isInDrawPile && !isPickedCard) ||
+    (isSelfToPlay && isPickedCard);
+  const canPlay =
+    (isSelfToPlay && game.isStarted) || (!isInDiscardPile && !isInDrawPile && !isFailedCard);
+
+  return (
+    <PlayingCardWrapper className={className}>
+      <PlayingCardInner
+        isFailed={isFailedCard}
+        isHidden={!isCardVisible}
+        isPicked={isPickedCard}
+        isSelected={isSelected}
+        {...(canPlay ? { onClick: () => handleCardClick(card) } : {})}
+      >
+        <StyledImg src={`/cards/${DECK_COLOR}_back.svg`} />
+        <FrontCard src={`/cards/${cardId}.svg`} />
+      </PlayingCardInner>
+    </PlayingCardWrapper>
+  );
 };
 
 export default PlayingCard;
