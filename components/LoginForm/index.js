@@ -10,7 +10,7 @@ import { HeroTitle, StyledCard } from './_styled';
 import useSocket from '../../hooks/useSocket';
 
 const LoginForm = () => {
-  const socket = useSocket('game.join', console.log);
+  const socket = useSocket('game.join');
   const formik = useFormik({
     initialValues: {
       gameName: '',

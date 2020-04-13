@@ -2,46 +2,22 @@ import React from 'react';
 
 import useCardSpots, { getPlayerCardSpotId } from '../../../hooks/useCardSpots';
 import CardSpot from '../../CardSpot';
-import { Row } from '../../layout';
-import PlayingCard from '../../PlayingCard';
-import { CardInfo, CardWrapper } from './_styled';
+import { StyledRow } from './_styled';
 
-const PlayerCards = ({
-  cardPlayerId,
-  cards,
-  onCardHide,
-  onCardPick,
-  selectedCards,
-  shouldRevealAllCards,
-  unfoldedCards
-}) => {
+const PlayerCards = ({ player }) => {
+  const { cards, id: playerId } = player;
   const { setCardSpotRef } = useCardSpots();
+  const spots = Array.apply(null, Array(Math.max(cards.length, 4)));
 
   return (
-    <Row spacing="s1_5">
-      {cards.map((card, cardIndex) => (
-        <div key={cardIndex} ref={setCardSpotRef(getPlayerCardSpotId(cardPlayerId, cardIndex))}>
-          {card ? (
-            <CardWrapper>
-              {(unfoldedCards[cardPlayerId] && unfoldedCards[cardPlayerId][cardIndex]) ||
-              shouldRevealAllCards ? (
-                <PlayingCard card={card} onClick={() => onCardHide(cardIndex, cardPlayerId)} />
-              ) : (
-                <>
-                  {card.metadata.isBeingWatched && <CardInfo>Being watched</CardInfo>}
-                  <CardSpot
-                    style={{ opacity: 0 }}
-                    onClick={() => onCardPick(cardIndex, cardPlayerId)}
-                  />
-                </>
-              )}
-            </CardWrapper>
-          ) : (
-            <CardSpot label="No Card" />
-          )}
-        </div>
+    <StyledRow spacing="s1_5">
+      {spots.map((_, idx) => (
+        <CardSpot
+          key={`${playerId}${idx}`}
+          ref={setCardSpotRef(getPlayerCardSpotId(playerId, idx))}
+        />
       ))}
-    </Row>
+    </StyledRow>
   );
 };
 

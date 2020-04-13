@@ -4,15 +4,36 @@ const Cards = require('./cards');
 const Player = require('./player');
 const Players = require('./players');
 
-const addCardToPlayer = (game, playerId, card) => {
-  const { players } = game;
+const addCardToPlayer = (game, playerId, cardId) => {
+  const { cards, nextActions: oldActions, players } = game;
+  const card = cards.find(card => card.id === cardId);
   const player = players[playerId];
+
+  // Find next available spot to put the card in player's hand
+  let playerSpotIndex = null;
+  let idx = 0;
+
+  while (playerSpotIndex === null) {
+    if (!cards.find(card => card.spot === `player${playerId}_${idx}`)) {
+      playerSpotIndex = idx;
+    }
+    idx++;
+  }
+
+  const cardToAdd = {
+    ...card,
+    spot: `player${playerId}_${playerSpotIndex}`,
+    belongsTo: playerId,
+    playerSpotIndex: playerSpotIndex
+  };
 
   return {
     ...game,
+    nextActions: oldActions.slice(1),
+    cards: cards.map(card => (cardId === card.id ? cardToAdd : card)),
     players: {
       ...players,
-      [player.id]: Player.addCard(player, card)
+      [player.id]: Player.addCard(player, cardToAdd)
     }
   };
 };
@@ -32,31 +53,11 @@ const addPlayer = (game, player) => {
   };
 };
 
-const setPlayerTmpCard = (game, playerId, card) => {
-  console.log('setPlayerTmpCard', { playerId, card });
-  const { players, nextActions: oldActions } = game;
-  const player = players[playerId];
-
-  // Next action: Player should throw a card
-  const nextAction = { player, action: 'throw' };
-
-  return {
-    ...game,
-    nextActions: [nextAction, ...oldActions.slice(1)],
-    players: {
-      ...players,
-      [player.id]: Player.setTmpCard(player, card)
-    }
-  };
-};
-
 const create = name => ({
   caracolePlayer: null, // player that triggers caracole
   cards: null, // Just to keep the generated deck somewhere
-  cardBeingWatched: null,
   discardPile: null, // Trash card pile
   drawPile: null, // Draw card pile
-  failedCard: null, // Wrong card thrown
   id: uuidv4(),
   isReady: false, // Ready when all players are ready
   isStarted: false, // Started when all players have watched his cards
@@ -71,7 +72,6 @@ const canStart = game => {
 };
 
 const end = game => {
-  console.log('end');
   const { players: playersCollection, caracolePlayer } = game;
   // Calc scores
   const playersCollectionWithScoresUpdated = Players.calcScores(playersCollection, caracolePlayer);
@@ -84,7 +84,6 @@ const end = game => {
   return {
     ...game,
     caracolePlayer: null,
-    cardBeingWatched: null,
     isReady: false,
     isStarted: false,
     nextActions: [],
@@ -97,16 +96,10 @@ const getPlayerByName = (game, playerName) => {
   return Players.getByName(players, playerName);
 };
 
-const getCard = (game, card) => {
-  // Get the card to throw
-  const { players } = game;
-  return players[card.playerId].cards[card.index];
-};
-
-const isCardCanBeThrown = (game, card) => {
+const isCardCanBeThrown = (game, cardId) => {
   // Get the last card on the discardPile
   const lastCard = game.discardPile.slice(-1); // THIS CAN BE EMPTY !!
-  const cardThrown = getCard(game, card);
+  const cardThrown = game.cards.find(card => card.id === cardId);
   return lastCard.length && cardThrown.value === lastCard[0].value;
 };
 
@@ -127,34 +120,30 @@ const isDone = game => {
   return players.find(Player.isDone);
 };
 
-const givePlayerCard = (game, playerId, card) => {
-  console.log('givePlayerCard', { playerId, card });
+const givePlayerCard = (game, playerId, cardId) => {
   const { nextActions: oldActions, players } = game;
-  // Get card
-  const cardToGive = getCard(game, card);
   // Find to whom player should give
   const [{ playerToAddACard }] = oldActions;
   const playerToRemoveACard = players[playerId];
 
   return {
-    ...game,
-    nextActions: oldActions.slice(1),
+    ...addCardToPlayer(game, playerToAddACard.id, cardId),
     players: {
       ...players,
-      [playerToAddACard.id]: Player.addCard(playerToAddACard, cardToGive),
-      [playerToRemoveACard.id]: Player.removeCard(playerToRemoveACard, card)
+      [playerToRemoveACard.id]: Player.removeCard(playerToRemoveACard, cardId)
     }
   };
 };
 
-const removeDiscardCard = game => ({
-  ...game,
-  discardPile: game.discardPile.slice(0, -1)
-});
+const removeDiscardCard = game => {
+  return {
+    ...game,
+    discardPile: game.discardPile.slice(0, -1)
+  };
+};
 
 const removeDrawCard = game => {
-  console.log('removeDrawCard');
-  let { discardPile, drawPile } = game;
+  let { cards, discardPile, drawPile } = game;
 
   // Verify there are still cards in the draw pile
   drawPile = drawPile.slice(1);
@@ -165,6 +154,17 @@ const removeDrawCard = game => {
 
   return {
     ...game,
+    cards: cards.map(card => {
+      // Reset discard pile
+      if (discardPile.find(discardCard => discardCard.id === card.id)) {
+        return { ...card, spot: 'discard-pile' };
+      }
+      // Reset draw pile
+      if (drawPile.find(drawCard => drawCard.id === card.id)) {
+        return { ...card, spot: 'draw-pile' };
+      }
+      return card;
+    }),
     discardPile,
     drawPile
   };
@@ -184,30 +184,38 @@ const setCaracolePlayer = (game, playerId) => {
   };
 };
 
-const setCardToDiscardPile = (game, playerId, card) => {
-  console.log('setCardToDiscardPile', { playerId, card });
+const setCardAsPickedCard = (game, playerId, cardId) => {
+  const { cards, players, nextActions: oldActions } = game;
+  const player = players[playerId];
 
-  let { discardPile, nextActions: oldActions, players: playersCollection } = game;
-  const cardToThrow = getCard(game, card);
-  let player = playersCollection[card.playerId];
+  // Next action: Player should throw a card
+  const nextAction = { player, action: 'throw' };
+
+  return {
+    ...game,
+    cards: cards.map(card => (card.id === cardId ? { ...card, spot: 'picked-card' } : card)),
+    nextActions: [nextAction, ...oldActions.slice(1)]
+  };
+};
+
+const setCardIsBeingWatchedBy = (game, playerId, cardId) => {
+  const { cards } = game;
+
+  return {
+    ...game,
+    cards: cards.map(card => (card.id === cardId ? { ...card, isBeingWatchedBy: playerId } : card))
+  };
+};
+
+const setCardToDiscardPile = (game, playerId, cardId) => {
+  let { cards, discardPile, nextActions: oldActions, players: playersCollection } = game;
+  const cardToThrow = cards.find(card => card.id === cardId);
+
+  let player = playersCollection[cardToThrow.belongsTo];
   let playerThrowing = playersCollection[playerId];
   let nextActions = [];
 
-  // If player that throw the card has a tmp card,
-  // the tmpCard will replace the thrown card.
-  if (playerId === card.playerId && player.tmpCard) {
-    player = Player.replaceCard(player, card);
-    // Remove action of throw
-    oldActions = oldActions.slice(1);
-    // Get next player to pick
-    const nextPlayer = Players.getNext(playersCollection, player);
-    nextActions = [{ player: nextPlayer, action: 'pick' }];
-  }
-  // If not, that means a player throw his card not during his turn
-  // so we remove the card from his hand
-  else {
-    player = Player.removeCard(player, card);
-  }
+  player = Player.removeCard(player, cardId);
 
   // TODO: The order of Q matter? (if multiple player put a Q)
   if (cardToThrow.value === 'Q') {
@@ -224,7 +232,7 @@ const setCardToDiscardPile = (game, playerId, card) => {
 
   // When player have to give a card to an other player
   // This action should be the next in the queue
-  if (playerId !== card.playerId) {
+  if (cardToThrow.belongsTo !== playerId) {
     nextActions = [
       { player: playerThrowing, action: 'give', playerToAddACard: player },
       ...nextActions
@@ -233,48 +241,143 @@ const setCardToDiscardPile = (game, playerId, card) => {
 
   return {
     ...game,
+    cards: cards.map(card => {
+      if (card.id === cardToThrow.id) {
+        return {
+          ...card,
+          belongsTo: null,
+          playerSpotIndex: null,
+          spot: 'discard-pile'
+        };
+      }
+      return card;
+    }),
     nextActions: [...nextActions, ...oldActions],
-    discardPile: [...discardPile, { ...cardToThrow, by: playerId }],
+    discardPile: [...discardPile, cardToThrow],
     players: {
       ...playersCollection,
-      [card.playerId]: player
+      [player.id]: player
+    }
+  };
+};
+
+const setCardToDiscardPileAndReplaceByPickedCard = (game, playerId, cardId) => {
+  let { cards, discardPile, nextActions: oldActions, players: playersCollection } = game;
+  const cardToThrow = cards.find(card => card.id === cardId);
+  const pickedCard = cards.find(card => card.spot === 'picked-card');
+  let player = playersCollection[playerId];
+  let nextActions = [];
+
+  // Add picked card to player
+  player = Player.removeCard(player, cardToThrow.id);
+  player = Player.addCard(player, pickedCard);
+  // Remove action of throw
+  oldActions = oldActions.slice(1);
+  // Get next player to pick
+  const nextPlayer = Players.getNext(playersCollection, player);
+  nextActions = [{ player: nextPlayer, action: 'pick' }];
+
+  // TODO: The order of Q matter? (if multiple player put a Q)
+  if (cardToThrow.value === 'Q') {
+    nextActions = [{ player, action: 'watch' }, ...nextActions];
+  }
+  if (cardToThrow.value === 'Joker') {
+    // Create action to swipe a card
+    nextActions = [{ player, action: 'swap' }, ...nextActions];
+  }
+  if (cardToThrow.value === 'J') {
+    // Create action to swipe a card
+    nextActions = [{ player, action: 'exchange' }, ...nextActions];
+  }
+
+  return {
+    ...game,
+    cards: cards.map(card => {
+      if (card.id === pickedCard.id) {
+        return {
+          ...card,
+          belongsTo: cardToThrow.belongsTo,
+          playerSpotIndex: cardToThrow.playerSpotIndex,
+          spot: cardToThrow.spot
+        };
+      }
+      if (card.id === cardToThrow.id) {
+        return {
+          ...card,
+          belongsTo: null,
+          playerSpotIndex: null,
+          spot: 'discard-pile'
+        };
+      }
+      return card;
+    }),
+    nextActions: [...nextActions, ...oldActions],
+    discardPile: [...discardPile, cardToThrow],
+    players: {
+      ...playersCollection,
+      [player.id]: player
     }
   };
 };
 
 const setDrawCardToPlayer = (game, playerId) => {
-  const { drawPile, nextActions: oldActions } = game;
+  const { drawPile } = game;
   // Add card from the draw pile to player
   const [cardToAdd] = drawPile;
   game = removeDrawCard(game);
-  game = addCardToPlayer(game, playerId, cardToAdd);
+
+  return addCardToPlayer(game, playerId, cardToAdd.id);
+};
+
+const setCardAsFailedCard = (game, playerId, cardId) => {
+  const { cards, players, nextActions: oldActions } = game;
+  const player = players[playerId];
+
+  // Next action: Player should get his card back
+  const nextAction = {
+    player,
+    action: 'pickFailed'
+  };
 
   return {
     ...game,
-    nextActions: oldActions.slice(-1)
+    cards: cards.map(card =>
+      card.id === cardId ? { ...card, spot: 'failed-card', oldSpot: card.spot } : card
+    ),
+    nextActions: [nextAction, ...oldActions]
   };
 };
 
-const setTmpCardToDiscardPile = (game, playerId) => {
-  console.log('setTmpCardToDiscardPile', {
-    playerId
-  });
-  const { discardPile, nextActions: oldActions, players } = game;
+const setFailedCardToPlayer = (game, playerId) => {
+  const { cards, nextActions: oldActions, players } = game;
+  const player = players[playerId];
+
+  return {
+    ...game,
+    cards: cards.map(card =>
+      card.spot === 'failed-card' ? { ...card, spot: card.oldSpot } : card
+    ),
+    nextActions: [{ player, action: 'pickDrawAfterFail' }, ...oldActions.slice(1)]
+  };
+};
+
+const setPickedCardToDiscardPile = (game, playerId) => {
+  const { cards, discardPile, nextActions: oldActions, players } = game;
   // Get player tmp card
+  let pickedCard = cards.find(card => card.spot === 'picked-card');
   let player = players[playerId];
-  const { tmpCard } = player;
   let nextActions = [];
 
   // Define action if the card is special
   // TODO: The order of Q matter? (if multiple player put a Q)
-  if (tmpCard.value === 'Q') {
+  if (pickedCard.value === 'Q') {
     nextActions = [{ player, action: 'watch' }];
   }
-  if (tmpCard.value === 'Joker') {
+  if (pickedCard.value === 'Joker') {
     // Create action to swipe a card
     nextActions = [{ player, action: 'swap' }, ...nextActions];
   }
-  if (tmpCard.value === 'J') {
+  if (pickedCard.value === 'J') {
     // Create action to swipe a card
     nextActions = [{ player, action: 'exchange' }, ...nextActions];
   }
@@ -285,71 +388,11 @@ const setTmpCardToDiscardPile = (game, playerId) => {
 
   return {
     ...game,
-    discardPile: [
-      ...discardPile,
-      {
-        ...tmpCard,
-        metadata: {
-          isBeingWatched: false,
-          playerId: null,
-          cardSpot: 'discard-pile'
-        }
-      }
-    ],
-    nextActions: [...nextActions, ...oldActions.slice(1)],
-    players: {
-      ...players,
-      [player.id]: Player.setTmpCard(player, null)
-    }
-  };
-};
-
-const setPlayerCardToFailedCard = (game, playerId, cardPosition) => {
-  const { players, nextActions: oldActions } = game;
-  const player = players[playerId];
-
-  const failedCard = getCard(game, cardPosition);
-
-  console.log({ failedCard });
-  // Next action: Player should get his card back
-  const nextAction = {
-    player,
-    action: 'pickFailed'
-  };
-
-  return {
-    ...game,
-    failedCard: {
-      card: {
-        ...failedCard,
-        metadata: {
-          isBeingWatched: false,
-          playerId: null,
-          cardSpot: 'failed-card'
-        }
-      },
-      cardOldPosition: cardPosition
-    },
-    nextActions: [nextAction, ...oldActions],
-    players: {
-      ...players,
-      [playerId]: Player.removeCard(player, cardPosition)
-    }
-  };
-};
-
-const setPlayerFailedCardBack = (game, playerId) => {
-  const { failedCard, nextActions: oldActions, players } = game;
-  const player = players[playerId];
-
-  return {
-    ...game,
-    failedCard: null,
-    nextActions: [{ player, action: 'pickDrawAfterFail' }, ...oldActions.slice(1)],
-    players: {
-      ...players,
-      [playerId]: Player.addCard(player, failedCard.card, failedCard.cardOldPosition.cardIndex)
-    }
+    cards: cards.map(card =>
+      card.spot === 'picked-card' ? { ...card, spot: 'discard-pile' } : card
+    ),
+    discardPile: [...discardPile, pickedCard],
+    nextActions: [...nextActions, ...oldActions.slice(1)]
   };
 };
 
@@ -357,8 +400,6 @@ const setPlayerHasDiscoveredHisCards = (game, playerId) => {
   let { players } = game;
   let nextActions = [];
   let player = players[playerId];
-  // Update the player
-  player = Player.setHasDiscoveredHisCards(player);
   // Update all players
   players = {
     ...players,
@@ -383,20 +424,12 @@ const setPlayerHasDiscoveredHisCards = (game, playerId) => {
 };
 
 const setPlayerHasWatched = game => {
-  console.log('setPlayerHasWatched');
-  const { cardBeingWatched, nextActions: oldActions, players } = game;
-  console.log({ cardBeingWatched });
-  const cardPlayer = players[cardBeingWatched.playerId];
+  const { cards, nextActions: oldActions } = game;
 
-  // TODO:
   return {
     ...game,
-    cardBeingWatched: null,
-    nextActions: [...oldActions.slice(1)], // Remove last action
-    players: {
-      ...players,
-      [cardPlayer.id]: Player.setCardIsBeingWatched(cardPlayer, cardBeingWatched, null)
-    }
+    cards: cards.map(card => ({ ...card, isBeingWatchedBy: null })), // no card is being watched anymore
+    nextActions: [...oldActions.slice(1)] // Remove last action
   };
 };
 
@@ -412,61 +445,74 @@ const setPlayerIsReady = (game, playerId) => {
   };
 };
 
-const setPlayerIsWatching = (game, playerId, card) => {
-  const { players } = game;
-  console.log({ playerId, card });
-  const cardPlayer = players[card.playerId];
-
-  return {
-    ...game,
-    cardBeingWatched: card,
-    players: {
-      ...players,
-      [cardPlayer.id]: Player.setCardIsBeingWatched(cardPlayer, card, playerId)
-    }
-  };
-};
-
 const setup = game => {
   const { players: playersCollection } = game;
-
-  // Set dealer
-  const playersCollectionWithDealer = Players.setDealer(playersCollection);
 
   // Generate cards
   const nbrOfPlayers = Players.getCount(playersCollection);
   const nbrCardsPerPlayer = nbrOfPlayers > 5 ? 6 : 4;
   const nbrCardsForPlayers = nbrOfPlayers * nbrCardsPerPlayer;
   const cards = Cards.getDeck(nbrOfPlayers > 2); // Joker only for 3+ players
-  const deckOfCards =
+  const deck =
     nbrOfPlayers > 5
       ? cards.concat(cards) // Two pack for +6 players
       : cards;
-  const shuffledDeck = Cards.shuffleDeck(deckOfCards);
-  const cardsForPlayers = shuffledDeck.slice(0, nbrCardsForPlayers);
-  // First card to be discovered
-  const discardPile = shuffledDeck.slice(nbrCardsForPlayers, nbrCardsForPlayers + 1);
-  const drawPile = shuffledDeck.slice(nbrCardsForPlayers + 1);
 
+  const shuffledDeck = Cards.shuffleDeck(deck);
+  const populatedShuffledDeck = shuffledDeck.map((card, idx) => {
+    // Cards of players
+    if (idx < nbrCardsForPlayers) {
+      const players = Object.values(playersCollection);
+      const playerIdx = idx % nbrOfPlayers;
+      const player = players[playerIdx];
+      const cardIdx = Math.floor(idx / nbrOfPlayers);
+
+      return {
+        ...card,
+        belongsTo: player.id,
+        isBeingWatchedBy: null,
+        playerSpotIndex: cardIdx,
+        spot: `player${player.id}_${cardIdx}`
+      };
+    }
+
+    // Cards in discard pile
+    if (idx === nbrCardsForPlayers) {
+      return {
+        ...card,
+        belongsTo: null,
+        isBeingWatchedBy: null,
+        playerSpotIndex: null,
+        spot: 'discard-pile'
+      };
+    }
+
+    // Cards in draw pile
+    return {
+      ...card,
+      belongsTo: null,
+      isBeingWatchedBy: null,
+      playerSpotIndex: null,
+      spot: 'draw-pile'
+    };
+  });
+
+  // First card to be discovered
+  const discardPile = populatedShuffledDeck.filter(card => card.spot === 'discard-pile');
+  const drawPile = populatedShuffledDeck.filter(card => card.spot === 'draw-pile');
+
+  // Set dealer
+  const playersCollectionWithDealer = Players.setDealer(playersCollection);
   // Give card to players
   const playersCollectionWithCards = Players.distributeCards(
     playersCollectionWithDealer,
-    cardsForPlayers
+    populatedShuffledDeck
   );
 
   return {
     ...game,
-    cards: shuffledDeck,
-    discardPile: [
-      {
-        ...discardPile[0],
-        metadata: {
-          isBeingWatched: false,
-          playerId: null,
-          cardSpot: 'discard-pile'
-        }
-      }
-    ],
+    cards: populatedShuffledDeck,
+    discardPile,
     drawPile,
     isReady: true,
     isStarted: false,
@@ -474,22 +520,52 @@ const setup = game => {
   };
 };
 
-const swapPlayersCards = (game, cards) => {
-  const { players, nextActions: oldActions } = game;
+const swapPlayersCards = (game, cardIdsToSwap) => {
+  const { cards, nextActions: oldActions, players } = game;
 
-  const [card1, card2] = cards;
-  const player1 = players[card1.playerId];
-  const player2 = players[card2.playerId];
-  const cardForPlayer1 = getCard(game, card2);
-  const cardForPlayer2 = getCard(game, card1);
+  const [card1Id, card2Id] = cardIdsToSwap;
+
+  const cardFromPlayer1 = cards.find(card => card.id === card1Id);
+  const cardFromPlayer2 = cards.find(card => card.id === card2Id);
+
+  const cardForPlayer1 = {
+    ...cardFromPlayer2,
+    belongsTo: cardFromPlayer1.belongsTo,
+    playerSpotIndex: cardFromPlayer1.playerSpotIndex,
+    spot: cardFromPlayer1.spot
+  };
+  const cardForPlayer2 = {
+    ...cardFromPlayer1,
+    belongsTo: cardFromPlayer2.belongsTo,
+    playerSpotIndex: cardFromPlayer2.playerSpotIndex,
+    spot: cardFromPlayer2.spot
+  };
+
+  let player1 = players[cardForPlayer1.belongsTo];
+  player1 = Player.removeCard(player1, cardFromPlayer1.id);
+  player1 = Player.addCard(player1, cardForPlayer1);
+
+  let player2 = players[cardForPlayer2.belongsTo];
+  player2 = Player.removeCard(player2, cardFromPlayer2.id);
+  player2 = Player.addCard(player2, cardForPlayer2);
 
   return {
     ...game,
-    nextActions: [...oldActions.slice(1)], // Remove last action, push more if necessary
+    // Swap position of card
+    cards: cards.map(card => {
+      if (card.id === cardFromPlayer1.id) {
+        return cardForPlayer2;
+      }
+      if (card.id === cardFromPlayer2.id) {
+        return cardForPlayer1;
+      }
+      return card;
+    }),
+    nextActions: oldActions.slice(1), // Remove last action
     players: {
       ...players,
-      [player1.id]: Player.addCard(player1, cardForPlayer1, card1.index),
-      [player2.id]: Player.addCard(player2, cardForPlayer2, card2.index)
+      [player1.id]: player1,
+      [player2.id]: player2
     }
   };
 };
@@ -500,7 +576,6 @@ module.exports = {
   canStart,
   create,
   end,
-  getCard,
   getPlayerByName,
   givePlayerCard,
   isCardCanBeThrown,
@@ -508,16 +583,17 @@ module.exports = {
   removeDiscardCard,
   removeDrawCard,
   setCaracolePlayer,
+  setCardAsFailedCard,
+  setCardAsPickedCard,
+  setCardIsBeingWatchedBy,
   setCardToDiscardPile,
+  setCardToDiscardPileAndReplaceByPickedCard,
   setDrawCardToPlayer,
-  setPlayerCardToFailedCard,
-  setPlayerFailedCardBack,
+  setFailedCardToPlayer,
+  setPickedCardToDiscardPile,
   setPlayerHasDiscoveredHisCards,
   setPlayerHasWatched,
   setPlayerIsReady,
-  setPlayerIsWatching,
-  setPlayerTmpCard,
-  setTmpCardToDiscardPile,
   setup,
   swapPlayersCards
 };
