@@ -42,7 +42,6 @@ const GameProvider = ({ children }) => {
   };
 
   const hideCard = card => {
-    console.log('hideCard', { card });
     setUnfoldedCards(unfoldedCards.filter(({ id }) => id !== card.id));
   };
 
@@ -53,7 +52,6 @@ const GameProvider = ({ children }) => {
   };
 
   const revealCard = card => {
-    console.log('revealCard', { card });
     if (card.belongsTo === selfId && !game.isStarted) {
       setDiscoveredCards([...discoveredCards, card]);
     }
@@ -61,7 +59,6 @@ const GameProvider = ({ children }) => {
   };
 
   const selectCard = (card, action) => {
-    console.log('selectCard', { card });
     const { id: cardId, belongsTo } = card;
     // Cannot select his own cards on joker action
     if (action.action === 'swap' && belongsTo === selfId) {
