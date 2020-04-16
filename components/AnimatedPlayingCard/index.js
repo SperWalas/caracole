@@ -16,6 +16,13 @@ const AnimatedPlayingCard = ({ card }) => {
 
   const originNode = getSpotNode(DRAW_PILE_SPOT_ID);
   const destinationNode = getSpotNode(cardSpot);
+  const rotation = destinationNode ? destinationNode.dataset.rotation || 'top' : 'top';
+  const rotationAnimation =
+    rotation === 'top' || 'rotation' === 'bottom'
+      ? 'rotate(0deg)'
+      : rotation === 'right'
+      ? 'rotate(-90deg)'
+      : 'rotate(90deg)';
 
   const [offset, setOffset] = useState(() => getNodesOffset(originNode, destinationNode));
 
@@ -25,8 +32,9 @@ const AnimatedPlayingCard = ({ card }) => {
   }, [width, height, cardSpots]);
 
   const animatedStyle = useSpring({
-    from: { transform: 'translate3d(0px, 0px, 0)' },
-    to: { transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` }
+    to: {
+      transform: `translate3d(${offset.x}px, ${offset.y}px, 0) ${rotationAnimation}`
+    }
   });
 
   return (

@@ -12,6 +12,7 @@ const RelativeWrapper = styled(PlayingCardWrapper)`
   border-radius: 6px;
   background: ${theme.color.backgroundAccented};
   opacity: 0.3;
+  transform: none;
 `;
 
 const CardSpot = (props, ref) => {

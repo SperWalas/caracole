@@ -17,8 +17,10 @@ const zIndexCardSpot = {
 };
 
 export const StyledAnimatedDiv = styled(animated.div)`
+  pointer-events: none;
   position: absolute;
   top: 0;
   left: 0;
   z-index: ${({ cardSpot }) => zIndexCardSpot[cardSpot] || 3};
+  will-change: transform;
 `;

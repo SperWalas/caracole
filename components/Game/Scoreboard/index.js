@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import useGame from '../../../hooks/useGame';
 import Button from '../../Button';
 import { Column, Row } from '../../layout';
 import { Body, Heading } from '../../text';
@@ -12,7 +13,8 @@ import {
   StyledColumn
 } from './_styled';
 
-const LoginForm = ({ children, players }) => {
+const Scoreboard = ({ children, players }) => {
+  const { game } = useGame();
   const [isOpen, setIsOpen] = useState(false);
 
   const closeScoreboard = () => setIsOpen(false);
@@ -24,9 +26,11 @@ const LoginForm = ({ children, players }) => {
         <StyledColumn alignItems="center" justifyContent="center">
           <ScoreModal>
             <ScoreModalContent spacing="s3">
-              <Heading>Scores</Heading>
+              <Heading>
+                Scores<Body subdued>(Game name: {game.name})</Body>
+              </Heading>
+
               <Row>
-                <div></div>
                 {Object.keys(players).map(pid => {
                   const { name, scores } = players[pid];
                   const incrementalScore = scores.map((_, idx) =>
@@ -59,4 +63,4 @@ const LoginForm = ({ children, players }) => {
   );
 };
 
-export default LoginForm;
+export default Scoreboard;
