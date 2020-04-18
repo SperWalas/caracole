@@ -4,7 +4,7 @@
     "es6": true,
     "node": true
   },
-  "plugins": ["react", "prettier"],
+  "plugins": ["react", "react-hooks", "prettier"],
   "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:prettier/recommended"],
   "parserOptions": {
     "ecmaFeatures": {
@@ -14,11 +14,19 @@
     "sourceType": "module"
   },
   "rules": {
+    "no-unused-vars": ["error", { "ignoreRestSiblings": true, "argsIgnorePattern": "^_" }],
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "error",
     "prettier/prettier": "error"
   },
   "globals": {
     "React": "writable"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }

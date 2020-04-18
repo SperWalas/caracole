@@ -29,7 +29,7 @@ const AnimatedPlayingCard = ({ card }) => {
   useEffect(() => {
     const newOffset = getNodesOffset(originNode, destinationNode);
     setOffset(newOffset);
-  }, [width, height, cardSpots]);
+  }, [cardSpots, width, height, originNode, destinationNode]);
 
   const animatedStyle = useSpring({
     to: {
