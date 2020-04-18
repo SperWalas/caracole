@@ -28,8 +28,6 @@ const useCardActions = () => {
   const nextPlayer = nextActions.length && nextActions[0] && nextActions[0].player;
   const isSelfToPlay = nextPlayer && nextPlayer.id === selfId;
 
-  console.log('render');
-
   // Swap cards when 2 are selected
   useEffect(() => {
     if (selectedCardsCount === 2) {

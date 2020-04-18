@@ -1,101 +1,89 @@
 import React from 'react';
 
 import { Row, Column } from '../layout';
-import { Heading, Subheading, Body, Link } from '../text';
+import { Heading, Link } from '../text';
 
-import Button from '../Button';
 import DiscardPile from './DiscardPile';
 import useGame from '../../hooks/useGame';
 import useCardActions from '../../hooks/useCardActions';
 import DrawPile from './DrawPile';
 import PickedCard from './PickedCard';
-import PlayerCards from './PlayerCards';
 import Scoreboard from './Scoreboard';
+import LeftPlayer from './Players/LeftPlayer';
+import RightPlayer from './Players/RightPlayer';
+import TopPlayer from './Players/TopPlayer';
+import BottomPlayer from './Players/BottomPlayer';
 
 const Game = () => {
-  const { handlePlayerIsReady, handlePlayerTriggerCaracole, game, selfId } = useGame();
+  const { game, selfId } = useGame();
   const { nextAction, nextPlayer } = useCardActions();
 
-  const { cards, discardPile, drawPile, name, players, isReady, isStarted } = game;
+  const { cards, discardPile, drawPile, players, isReady, isStarted } = game;
 
-  const selfPlayer = Object.values(players).find(p => p.id === selfId) || {};
-  const otherPlayers = Object.values(players).filter(p => p.id !== selfId) || [];
+  const playersValues = Object.values(players);
+  const selfPlayer = playersValues.find(p => p.id === selfId) || {};
+  const playersCount = playersValues.length;
+  const orderTable = Array.apply(null, Array(playersCount)).map((_, idx) => {
+    return (selfPlayer.order + idx) % playersCount;
+  });
+  const otherPlayers = playersValues.filter(p => p.id !== selfId) || [];
+  const otherPlayersOrdered = otherPlayers.sort((a, b) => {
+    return orderTable.indexOf(a.order) - orderTable.indexOf(b.order);
+  });
 
-  const renderPlayerDeck = (player, key) => {
-    const isPlayerToPlay = nextPlayer && nextPlayer.id === player.id;
-    const isSelf = selfPlayer.id === player.id;
-    const canCaracole = isSelf && isPlayerToPlay && nextAction === 'pick' && !game.caracolePlayer;
-
-    return (
-      <Column spacing="s2" key={key} alignItems="center">
-        <Row spacing="s2">
-          <Subheading highlighted={isPlayerToPlay}>
-            {!!isPlayerToPlay && '→'} {player.name} {!!isPlayerToPlay && '←'}
-          </Subheading>
-        </Row>
-
-        <PlayerCards player={player} />
-        {!!canCaracole && isReady && (
-          <Button onClick={() => handlePlayerTriggerCaracole(player)}>Caracoler !</Button>
-        )}
-
-        {!isReady && (
+  const renderCenterLayout = () => (
+    <Column flex="1 0" spacing="s2" justifyContent="center">
+      <Column textAlign="center">
+        {!!nextPlayer && !!nextAction ? (
+          <Heading withHighlightedParts>
+            Turn of <strong>{nextPlayer.name}</strong> to <strong>{nextAction}</strong>
+          </Heading>
+        ) : (
           <>
-            {player.isReady ? (
-              <Body>Ready</Body>
-            ) : isSelf ? (
-              <Button onClick={handlePlayerIsReady}>Let’s go !</Button>
+            {!isReady ? (
+              <Heading>Waiting for every player to be ready</Heading>
             ) : (
-              <Body>Not ready yet…</Body>
+              !isStarted && <Heading>Every player should remember 2 of their cards</Heading>
             )}
           </>
         )}
       </Column>
-    );
-  };
+      <Row justifyContent="center" spacing="s4">
+        <PickedCard />
+        <Row spacing="s1_5" justifyContent="center">
+          <DiscardPile />
+          <DrawPile cards={cards} drawPile={drawPile} discardPile={discardPile} />
+        </Row>
+      </Row>
+      <Row justifyContent="center">
+        <Scoreboard players={players}>
+          {({ open }) => <Link onClick={open}>see scores</Link>}
+        </Scoreboard>
+      </Row>
+    </Column>
+  );
 
   return (
-    <Column flex="1 0" padding="s3">
-      <Column flex="1 0" justifyContent="space-between" spacing="s6">
-        {/* TODO spread other players around a circle*/}
-        <Row justifyContent="space-around" spacing="s3">
-          {otherPlayers.map((player, index) => renderPlayerDeck(player, index))}
-        </Row>
-
-        <Column spacing="s2" justifyContent="center">
-          <Column textAlign="center">
-            <Body>Game name: {name}</Body>
-            {!!nextPlayer && !!nextAction ? (
-              <Heading withHighlightedParts>
-                Turn of <strong>{nextPlayer.name}</strong> to <strong>{nextAction}</strong>
-              </Heading>
-            ) : (
-              <>
-                {!isReady ? (
-                  <Heading>Waiting for every player to be ready</Heading>
-                ) : (
-                  !isStarted && <Heading>Every player should remember 2 of their cards</Heading>
-                )}
-              </>
-            )}
-          </Column>
-          <Row justifyContent="center" spacing="s4">
-            <PickedCard />
-            <Row spacing="s1_5" justifyContent="center">
-              <DiscardPile />
-              <DrawPile cards={cards} drawPile={drawPile} discardPile={discardPile} />
-            </Row>
-          </Row>
-          <Row justifyContent="center">
-            <Scoreboard players={players}>
-              {({ open }) => <Link onClick={open}>see scores</Link>}
-            </Scoreboard>
-          </Row>
-        </Column>
-
-        <Row justifyContent="space-around">{renderPlayerDeck(selfPlayer)}</Row>
+    <Row flex="1 0" padding="s2" justifyContent="space-between">
+      <Column flex="1 0" justifyContent="space-around">
+        {otherPlayersOrdered.length > 1 && <LeftPlayer player={otherPlayersOrdered[0]} />}
       </Column>
-    </Column>
+
+      <Column Column flex="1 0" justifyContent="space-between" alignItems="center">
+        <Column flex="1 0">
+          {otherPlayersOrdered.length === 1 && <TopPlayer player={otherPlayersOrdered[0]} />}
+          {otherPlayersOrdered.length > 1 && <TopPlayer player={otherPlayersOrdered[1]} />}
+        </Column>
+        {renderCenterLayout()}
+        <Column flex="1 0" justifyContent="flex-end">
+          <BottomPlayer player={selfPlayer} />
+        </Column>
+      </Column>
+
+      <Column Column flex="1 0" alignItems="flex-end" justifyContent="space-around">
+        {otherPlayersOrdered.length === 3 && <RightPlayer player={otherPlayersOrdered[2]} />}
+      </Column>
+    </Row>
   );
 };
 

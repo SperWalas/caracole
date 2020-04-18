@@ -19,7 +19,7 @@ const SUIT_LETTER = {
   spades: 'S'
 };
 
-const PlayingCard = ({ card, className }) => {
+const PlayingCard = ({ card, className, isRotated = false }) => {
   const { cardSpots } = useCardSpots();
   const { handleCardClick, isSelfToPlay } = useCardActions();
   const { game, selectedCards, unfoldedCards } = useGame();
@@ -43,13 +43,16 @@ const PlayingCard = ({ card, className }) => {
     (isSelfToPlay && game.isStarted) || (!isInDiscardPile && !isInDrawPile && !isFailedCard);
 
   return (
-    <PlayingCardWrapper className={className}>
+    <PlayingCardWrapper
+      className={className}
+      isRotated={isRotated}
+      {...(canPlay ? { onClick: () => handleCardClick(card) } : {})}
+    >
       <PlayingCardInner
         isFailed={isFailedCard}
         isHidden={!isCardVisible}
         isPicked={isPickedCard}
         isSelected={isSelected}
-        {...(canPlay ? { onClick: () => handleCardClick(card) } : {})}
       >
         <StyledImg src={`/cards/${DECK_COLOR}_back.svg`} />
         <FrontCard src={`/cards/${cardId}.svg`} />

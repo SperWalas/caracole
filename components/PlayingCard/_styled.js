@@ -23,25 +23,10 @@ export const PlayingCardInner = styled.div`
   width: 100%;
   position: relative;
   border-radius: ${theme.metric.borderRadius};
-  transition: transform 0.3s ease-out;
+  transition: transform 0.4s ease-in-out;
   transform-style: preserve-3d;
   cursor: pointer;
-
-  ${props =>
-    props.onClick &&
-    css`
-      &:hover {
-        box-shadow: 2px 8px 10px ${theme.color.shadow};
-        transform: translateY(-3px);
-        transition: transform 0.1s ease-out;
-
-        ${props =>
-          !props.isHidden &&
-          css`
-            transform: rotateY(180deg) translateY(-3px);
-          `}
-      }
-    `}
+  will-change: transform;
 
   ${props =>
     !props.isHidden &&
@@ -49,41 +34,8 @@ export const PlayingCardInner = styled.div`
       transform: rotateY(180deg);
     `}
 
-  ${props =>
-    props.isFailedCard &&
-    css`
-      transform: rotateZ(-10deg) rotateY(180deg);
-      &:hover {
-        transform: translateY(-5px) rotateZ(-10deg) rotateY(180deg);
-      }
-    `}
-
-  ${props =>
-    props.isSelected &&
-    css`
-      transform: scale(1.1);
-      box-shadow: 0 0 2px 2px ${theme.color.governorBay};
-
-      &:hover {
-        box-shadow: 2px 8px 10px ${theme.color.shadow};
-        transform: scale(1.1) translateY(-5px);
-      }
-    `}
-
-  /* ${props =>
-    props.isPicked &&
-    css`
-      box-shadow: 0 6px 10px 0px ${theme.color.shadow};
-      transform: scale(1.2) rotateY(180deg);
-
-      &:hover {
-        box-shadow: 0 6px 8px 3px ${theme.color.shadow}
-        transform: scale(1.2) translateY(-5px) rotateY(180deg);
-      }
-    `} */
-
   /* DEBUG */
-  ${StyledImg} {
+  /* ${StyledImg} {
     opacity: 0;
   }
   ${FrontCard} {
@@ -96,12 +48,59 @@ export const PlayingCardInner = styled.div`
       ${FrontCard} {
         opacity: 1;
       }
-    `}
+    `} */
   /* END DEBUG */
 `;
 
 export const PlayingCardWrapper = styled.div`
-  width: ${theme.metric.cardWidth};
-  height: calc(${theme.metric.cardWidth} * 1.4);
+  pointer-events: initial;
+  transition: transform 0.1s ease-out;
   perspective: 1000px;
+
+  ${props =>
+    props.isRotated
+      ? css`
+          height: ${theme.metric.cardWidth};
+          width: calc(${theme.metric.cardWidth} * 1.4);
+        `
+      : css`
+          width: ${theme.metric.cardWidth};
+          height: calc(${theme.metric.cardWidth} * 1.4);
+        `}
+
+  ${props =>
+    props.onClick &&
+    css`
+      &:hover {
+        box-shadow: 2px 8px 10px ${theme.color.shadow};
+        transform: scale(1.05);
+        transition: transform 0.2s ease-out;
+      }
+    `}
+
+  ${props =>
+    props.isSelected &&
+    css`
+      transform: scale(1.1);
+      box-shadow: 0 0 2px 2px ${theme.color.governorBay};
+
+      &:hover {
+        box-shadow: 2px 8px 10px ${theme.color.shadow};
+        transform: scale(1.15);
+      }
+    `}
+  
+  ${props =>
+    props.isFailedCard &&
+    css`
+      transform: rotateZ(-10deg);
+
+      ${PlayingCardInner} {
+        transform: rotateY(180deg);
+      }
+
+      &:hover {
+        transform: scale(1.05) rotateZ(-10deg);
+      }
+    `}
 `;
