@@ -15,6 +15,7 @@ const getLeftToRightWidth = () => `
 `;
 
 export const StyledColumn = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -22,6 +23,12 @@ export const StyledColumn = styled.div`
 
   width: ${getTopToBottomWidth};
   height: ${getLeftToRightWidth};
+
+  ${PlayingCardWrapper} {
+    flex-shrink: 0;
+    flex-grow: 0;
+    margin: ${theme.spacing.s0};
+  }
 
   ${props =>
     (props.position === 'left' || props.position === 'right') &&
@@ -50,9 +57,22 @@ export const StyledColumn = styled.div`
       flex-wrap: wrap-reverse;
     `}
 
-  ${PlayingCardWrapper} {
-    flex-shrink: 0;
-    flex-grow: 0;
-    margin: ${theme.spacing.s0};
-  }
+  ${props =>
+    props.isHighlighted &&
+    css`
+      &::before {
+        --halo-color: rgba(255, 255, 255, 0.4);
+        content: '';
+        z-index: -1;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: var(--halo-color);
+        box-shadow: 0 0 65px 65px var(--halo-color);
+        border-radius: 50px;
+      }
+    `}
+
 `;
