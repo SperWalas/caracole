@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import io from 'socket.io-client';
 
 import useGame from './useGame';
@@ -7,7 +7,9 @@ const socket = io();
 
 const DISCOVERY_CARDS_COUNT = 2;
 
-const useCardActions = () => {
+const CardActionsContext = createContext(null);
+
+export const CardActionsProvider = ({ children }) => {
   const {
     discoveredCardsCount,
     game,
@@ -22,19 +24,27 @@ const useCardActions = () => {
     unfoldedCards,
     unfoldedCardsCount
   } = useGame();
-  const { id: gameId, nextActions, isStarted } = game;
+  const { id: gameId, nextActions = [], isStarted } = game || {};
 
-  const nextAction = nextActions.length && nextActions[0] && nextActions[0].action;
-  const nextPlayer = nextActions.length && nextActions[0] && nextActions[0].player;
+  const nextActionObject = nextActions && nextActions.length && nextActions[0];
+  const { action: nextAction, player: nextPlayer } = nextActionObject || {};
   const isSelfToPlay = nextPlayer && nextPlayer.id === selfId;
 
   // Swap cards when 2 are selected
   useEffect(() => {
+    const handleSwapCards = cards => {
+      console.log('handleSwapCards');
+      socket.emit('game.swapCardBetweenPlayer', {
+        gameId,
+        cards: cards.map(card => card.id)
+      });
+    };
+
     if (selectedCardsCount === 2) {
       handleSwapCards(selectedCards);
       resetCards();
     }
-  }, [selectedCardsCount]);
+  }, [gameId, resetCards, selectedCards, selectedCardsCount]);
 
   const handleCardClick = card => {
     console.log('handleCardClick');
@@ -146,14 +156,6 @@ const useCardActions = () => {
     });
   };
 
-  const handleSwapCards = cards => {
-    console.log('handleSwapCards');
-    socket.emit('game.swapCardBetweenPlayer', {
-      gameId,
-      cards: cards.map(card => card.id)
-    });
-  };
-
   const handleThrowCard = ({ id: cardId }) => {
     console.log('handleThrowCard');
     socket.emit('game.playerThrowCard', {
@@ -181,12 +183,27 @@ const useCardActions = () => {
     revealCard(card);
   };
 
-  return {
-    handleCardClick,
-    isSelfToPlay,
-    nextAction,
-    nextPlayer
-  };
+  return (
+    <CardActionsContext.Provider
+      value={{
+        handleCardClick,
+        isSelfToPlay,
+        nextAction,
+        nextPlayer
+      }}
+    >
+      {children}
+    </CardActionsContext.Provider>
+  );
+};
+
+const useCardActions = () => {
+  const cardActionsContext = useContext(CardActionsContext);
+  if (!cardActionsContext) {
+    throw Error('You should not use useCardActions outside a CardActionsContext');
+  }
+
+  return cardActionsContext;
 };
 
 export default useCardActions;

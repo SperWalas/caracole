@@ -4,6 +4,7 @@ import { normalize } from 'polished';
 import io from 'socket.io-client';
 import { createGlobalStyle } from 'styled-components';
 
+import { CardActionsProvider } from '../hooks/useCardActions';
 import { CardSpotsProvider } from '../hooks/useCardSpots';
 import { GameProvider } from '../hooks/useGame';
 
@@ -52,9 +53,11 @@ class CaracoleApp extends App {
       <>
         <GlobalStyle />
         <GameProvider>
-          <CardSpotsProvider>
-            <Component {...pageProps} socket={this.state.socket} />
-          </CardSpotsProvider>
+          <CardActionsProvider>
+            <CardSpotsProvider>
+              <Component {...pageProps} socket={this.state.socket} />
+            </CardSpotsProvider>
+          </CardActionsProvider>
         </GameProvider>
       </>
     );
