@@ -4,8 +4,8 @@ import { normalize } from 'polished';
 import io from 'socket.io-client';
 import { createGlobalStyle } from 'styled-components';
 
-import GameProvider from '../hooks/GameProvider';
 import { CardSpotsProvider } from '../hooks/useCardSpots';
+import { GameProvider } from '../hooks/useGame';
 
 // Override global style to avoid Story height to be 100% of the screen height
 const GlobalStyle = createGlobalStyle`
@@ -17,7 +17,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-class MyApp extends App {
+class CaracoleApp extends App {
   constructor() {
     super();
 
@@ -61,4 +61,4 @@ class MyApp extends App {
   }
 }
 
-export default MyApp;
+export default CaracoleApp;
