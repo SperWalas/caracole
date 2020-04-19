@@ -101,7 +101,6 @@ export const CardActionsProvider = ({ children }) => {
       }
 
       if (nextAction === 'watch') {
-        console.log({ unfoldedCardsCount });
         return !unfoldedCardsCount ? handleWatchCard(card) : handleHasWatchedCard(card);
       }
     }
