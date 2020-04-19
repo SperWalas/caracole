@@ -2,8 +2,6 @@ export const getNodesOffset = (selfNode, targetNode) => {
   const fromRect = selfNode ? selfNode.getBoundingClientRect() : null;
   const toRect = targetNode ? targetNode.getBoundingClientRect() : null;
 
-  console.log({ toRect });
-
   return fromRect && toRect
     ? {
         x: toRect.x + toRect.width * 0.5 - (fromRect.x + fromRect.width * 0.5), // toRect.x - toRect.width * 0.5 - fromRect.x + fromRect.width * 0.5,

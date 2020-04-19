@@ -25,7 +25,6 @@ export const PlayingCardInner = styled.div`
   border-radius: ${theme.metric.borderRadius};
   transition: transform 0.4s ease-in-out;
   transform-style: preserve-3d;
-  cursor: pointer;
   will-change: transform;
 
   ${props =>
@@ -72,6 +71,7 @@ export const PlayingCardWrapper = styled.div`
     props.onClick &&
     css`
       &:hover {
+        cursor: pointer;
         box-shadow: 2px 8px 10px ${theme.color.shadow};
         transform: scale(1.05);
         transition: transform 0.2s ease-out;
