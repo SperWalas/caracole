@@ -262,7 +262,7 @@ const setCardToDiscardPile = (game, playerId, cardId) => {
 };
 
 const setCardToDiscardPileAndReplaceByPickedCard = (game, playerId, cardId) => {
-  let { cards, discardPile, nextActions: oldActions, players: playersCollection } = game;
+  let { cards, discardPile, drawPile, nextActions: oldActions, players: playersCollection } = game;
   const cardToThrow = cards.find(card => card.id === cardId);
   const pickedCard = cards.find(card => card.spot === 'picked-card');
   let player = playersCollection[playerId];
@@ -312,7 +312,8 @@ const setCardToDiscardPileAndReplaceByPickedCard = (game, playerId, cardId) => {
       return card;
     }),
     nextActions: [...nextActions, ...oldActions],
-    discardPile: [...discardPile, cardToThrow],
+    discardPile: [...discardPile.filter(c => c.id !== pickedCard.id), cardToThrow],
+    drawPile: drawPile.filter(c => c.id !== pickedCard.id),
     players: {
       ...playersCollection,
       [player.id]: player
@@ -362,24 +363,28 @@ const setFailedCardToPlayer = (game, playerId) => {
 };
 
 const setPickedCardToDiscardPile = (game, playerId) => {
-  const { cards, discardPile, nextActions: oldActions, players } = game;
+  const { cards, discardPile, drawPile, nextActions: oldActions, players } = game;
   // Get player tmp card
   let pickedCard = cards.find(card => card.spot === 'picked-card');
   let player = players[playerId];
   let nextActions = [];
 
-  // Define action if the card is special
-  // TODO: The order of Q matter? (if multiple player put a Q)
-  if (pickedCard.value === 'Q') {
-    nextActions = [{ player, action: 'watch' }];
-  }
-  if (pickedCard.value === 'Joker') {
-    // Create action to swipe a card
-    nextActions = [{ player, action: 'swap' }, ...nextActions];
-  }
-  if (pickedCard.value === 'J') {
-    // Create action to swipe a card
-    nextActions = [{ player, action: 'exchange' }, ...nextActions];
+  const isPickedFromDiscard = !!discardPile.find(c => c.id === pickedCard.id);
+
+  if (!isPickedFromDiscard) {
+    if (pickedCard.value === 'Q') {
+      // Define action if the card is special
+      // TODO: The order of Q matter? (if multiple player put a Q)
+      nextActions = [{ player, action: 'watch' }];
+    }
+    if (pickedCard.value === 'Joker') {
+      // Create action to swipe a card
+      nextActions = [{ player, action: 'swap' }, ...nextActions];
+    }
+    if (pickedCard.value === 'J') {
+      // Create action to swipe a card
+      nextActions = [{ player, action: 'exchange' }, ...nextActions];
+    }
   }
 
   // Find next action
@@ -391,7 +396,8 @@ const setPickedCardToDiscardPile = (game, playerId) => {
     cards: cards.map(card =>
       card.spot === 'picked-card' ? { ...card, spot: 'discard-pile' } : card
     ),
-    discardPile: [...discardPile, pickedCard],
+    discardPile: [...discardPile.filter(c => c.id !== pickedCard.id), pickedCard],
+    drawPile: drawPile.filter(c => c.id !== pickedCard.id),
     nextActions: [...nextActions, ...oldActions.slice(1)]
   };
 };
