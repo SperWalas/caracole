@@ -52,7 +52,7 @@ export const CardActionsProvider = ({ children }) => {
 
     if (!isStarted) {
       // Player can only watch their own cards at the beginning
-      if (isSelf) {
+      if (card.spot === `player${selfId}_1` || card.spot === `player${selfId}_3`) {
         const isCardRevealed = !!unfoldedCards.find(unfoldedCard => unfoldedCard.id === card.id);
         if (isCardRevealed) {
           if (unfoldedCardsCount === 1 && discoveredCardsCount === DISCOVERY_CARDS_COUNT) {
