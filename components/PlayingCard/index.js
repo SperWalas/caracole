@@ -21,8 +21,8 @@ const SUIT_LETTER = {
 
 const PlayingCard = ({ card, className, isRotated = false }) => {
   const { cardSpots } = useCardSpots();
-  const { handleCardClick, isSelfToPlay } = useCardActions();
-  const { game, selectedCards, unfoldedCards } = useGame();
+  const { handleCardClick, isSelfToPlay, nextAction } = useCardActions();
+  const { game, selectedCards, selfId, unfoldedCards } = useGame();
 
   const { id, suit, value } = card;
   const suitLetter = SUIT_LETTER[suit];
@@ -32,6 +32,8 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
   const isFailedCard = cardSpot === FAILED_CARD_SPOT_ID;
   const isInDiscardPile = cardSpot === DISCARD_PILE_SPOT_ID;
   const isInDrawPile = cardSpot === DRAW_PILE_SPOT_ID;
+  const isInSelfPlayersHand = (cardSpot || '').startsWith(`player${selfId}`);
+  const isInPlayersHand = (cardSpot || '').startsWith('player');
   const isPickedCard = cardSpot === PICKED_CARD_SPOT_ID;
   const isSelected = !!selectedCards.find(selectedCard => selectedCard.id === id);
   const isUnfolded = !!unfoldedCards.find(unfoldedCard => unfoldedCard.id === id);
@@ -39,8 +41,24 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
   const isCardVisible =
     ((isInDiscardPile || isUnfolded || isFailedCard) && !isInDrawPile && !isPickedCard) ||
     (isSelfToPlay && isPickedCard);
-  const canPlay =
-    (isSelfToPlay && game.isStarted) || (!isInDiscardPile && !isInDrawPile && !isFailedCard);
+
+  const canDiscover =
+    !game.isStarted && (cardSpot === `player${selfId}_1` || cardSpot === `player${selfId}_3`);
+  const canGive = isSelfToPlay && nextAction === 'give' && isInSelfPlayersHand;
+  const canPick =
+    (isSelfToPlay && nextAction === 'pick' && (isInDiscardPile || isInDrawPile)) ||
+    (isSelfToPlay && nextAction === 'pickFailed' && isFailedCard) ||
+    (isSelfToPlay && nextAction === 'pickDrawAfterFail' && isInDrawPile);
+  const canSelect =
+    isSelfToPlay && (nextAction === 'exchange' || nextAction === 'swap') && isInPlayersHand;
+  const canThrow =
+    (game.isStarted && !isSelfToPlay && isInPlayersHand) ||
+    (isSelfToPlay && nextAction === 'throw' && (isPickedCard || isInSelfPlayersHand)) ||
+    (isSelfToPlay && nextAction === 'pick' && isInPlayersHand);
+  // TODO: allow watch the top card of the draw pile
+  const canWatch = isSelfToPlay && nextAction === 'watch' && isInPlayersHand;
+
+  const canPlay = canDiscover || canGive || canPick || canSelect || canThrow || canWatch;
 
   return (
     <PlayingCardWrapper
