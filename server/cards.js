@@ -2,7 +2,8 @@ const uuidv4 = require('uuid').v4;
 
 // Constants
 const suits = ['spades', 'diamonds', 'clubs', 'hearts'];
-const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+// const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+const values = ['A', '2']; //, '3'], '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
 /**
  * Data format
@@ -33,15 +34,17 @@ const getDeck = (withJoker = true) => {
       deck.push(card);
     }
   }
-  // if (withJoker) {
-  //   const joker = {
-  //     id: uuidv4(),
-  //     value: 'Joker',
-  //     suit: null,
-  //     points: 10
-  //   };
-  //   deck.push(joker, joker);
-  // }
+  if (withJoker) {
+    for (let i = 0; i < 2; i++) {
+      const joker = {
+        id: uuidv4(),
+        value: 'Joker',
+        suit: null,
+        points: 10
+      };
+      deck.push(joker);
+    }
+  }
 
   return deck;
 };
