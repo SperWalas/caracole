@@ -49,14 +49,6 @@ io.on('connection', socket => {
       sendGameUpdateToClients(game.id);
     } else {
       // Want to create
-      const games = FakeDB.getGames();
-      const gamesCount = Object.keys(games).length;
-      // Avoid too many game
-      if (gamesCount >= NBR_MAX_SIMULTANEOUS_GAMES) {
-        socket.emit('errorMessage', 'Too many games created.');
-        return;
-      }
-      // Can create a game
       game = Game.create(gameName);
       // Add player to the game
       const player = Player.create(playerName);
