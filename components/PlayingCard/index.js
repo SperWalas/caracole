@@ -64,14 +64,11 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
     <PlayingCardWrapper
       className={className}
       isRotated={isRotated}
+      isSelected={isSelected}
+      isFailedCard={isFailedCard}
       {...(canPlay ? { onClick: () => handleCardClick(card) } : {})}
     >
-      <PlayingCardInner
-        isFailed={isFailedCard}
-        isHidden={!isCardVisible}
-        isPicked={isPickedCard}
-        isSelected={isSelected}
-      >
+      <PlayingCardInner isHidden={!isCardVisible}>
         <StyledImg src={`/cards/${DECK_COLOR}_back.svg`} />
         <FrontCard src={`/cards/${cardId}.svg`} />
       </PlayingCardInner>
