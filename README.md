@@ -24,3 +24,29 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/zeit/next.js/) - your feedback and contributions are welcome!
+
+## Deploy
+
+#### 1 - Setup the deploy configuration file.
+
+Just replace `__USER_NAME__`, `__SERVER_IP__`, `__SERVER_PATH__` in the file `deploy.sample.json` with your server information and rename this file to `deploy.json`.
+
+#### 2 - Init the git hook
+
+```
+make deploy-init
+```
+
+_NOTE: You server need access to your github account via ssh. See [your github settings](https://github.com/settings/keys)_
+
+#### 3 - Deploy
+
+```
+make deploy
+```
+
+You app will be accessible through `http://SERVER_IP:3500`.
+
+#### Troubleshooting
+
+If you still have right issue on the 2nd step, be sure that github is added as known host on your server.
