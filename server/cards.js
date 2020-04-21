@@ -33,15 +33,15 @@ const getDeck = (withJoker = true) => {
       deck.push(card);
     }
   }
-  if (withJoker) {
-    const joker = {
-      id: uuidv4(),
-      value: 'Joker',
-      suit: null,
-      points: 10
-    };
-    deck.push(joker, joker);
-  }
+  // if (withJoker) {
+  //   const joker = {
+  //     id: uuidv4(),
+  //     value: 'Joker',
+  //     suit: null,
+  //     points: 10
+  //   };
+  //   deck.push(joker, joker);
+  // }
 
   return deck;
 };
