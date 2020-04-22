@@ -8,7 +8,7 @@ import useCardSpots, {
   PICKED_CARD_SPOT_ID
 } from '../../hooks/useCardSpots';
 import useGame from '../../hooks/useGame';
-import { PlayingCardWrapper, PlayingCardInner, StyledImg, FrontCard } from './_styled';
+import { PlayingCardWrapper, PlayingCardInner, StyledEye, StyledImg, FrontCard } from './_styled';
 
 export const DECK_COLOR = 'blue'; // 'blue' | 'red'
 
@@ -24,7 +24,7 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
   const { handleCardClick, isSelfToPlay, nextAction } = useCardActions();
   const { game, selectedCards, selfId, unfoldedCards } = useGame();
 
-  const { id, suit, value } = card;
+  const { id, isBeingWatchedBy, suit, value } = card;
   const suitLetter = SUIT_LETTER[suit];
   const cardId = value === 'Joker' ? 'joker' : `${value}${suitLetter}`;
 
@@ -69,6 +69,7 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
       {...(canPlay ? { onClick: () => handleCardClick(card) } : {})}
     >
       <PlayingCardInner isHidden={!isCardVisible}>
+        {isBeingWatchedBy && isBeingWatchedBy !== selfId && <StyledEye src={'/assets/eye.svg'} />}
         <StyledImg src={`/cards/${DECK_COLOR}_back.svg`} />
         <FrontCard src={`/cards/${cardId}.svg`} />
       </PlayingCardInner>

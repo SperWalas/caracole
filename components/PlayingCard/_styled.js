@@ -115,3 +115,13 @@ export const PlayingCardWrapper = styled.div`
       }
     `}
 `;
+
+export const StyledEye = styled.img`
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+`;

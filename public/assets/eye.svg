@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>Artboard</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M21,10.9166667 C21,13.8606667 18.648,16.25 15.75,16.25 C15.75,19.194 18.102,21.5833333 21,21.5833333 C23.898,21.5833333 26.25,19.194 26.25,16.25 C26.25,13.306 23.898,10.9166667 21,10.9166667 Z M21,0.25 C10.23225,0.25 0,12.6446667 0,16.25 C0,19.8553333 10.23225,32.25 21,32.25 C31.76775,32.25 42,19.8553333 42,16.25 C42,12.6446667 31.76775,0.25 21,0.25 Z M21,26.9166667 C15.201375,26.9166667 10.5,22.1406667 10.5,16.25 C10.5,10.3593333 15.201375,5.58333333 21,5.58333333 C26.798625,5.58333333 31.5,10.3593333 31.5,16.25 C31.5,22.1406667 26.798625,26.9166667 21,26.9166667 Z" id="path-1"></path>
+        <filter x="-16.7%" y="-15.6%" width="133.3%" height="143.8%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="eye" transform="translate(3.000000, 8.000000)" fill-rule="nonzero">
+            <g id="Shape">
+                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <use fill="#FFFFFF" xlink:href="#path-1"></use>
+            </g>
+        </g>
+    </g>
+</svg>
