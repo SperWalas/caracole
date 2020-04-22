@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import useGame from '../../../hooks/useGame';
-import Button from '../../Button';
+import Button, { DestructiveButton } from '../../Button';
 import { Column, Row } from '../../layout';
 import { Body, Heading } from '../../text';
 import {
@@ -14,7 +14,7 @@ import {
 } from './_styled';
 
 const Scoreboard = ({ children, players }) => {
-  const { game } = useGame();
+  const { game, selfId, handleReset } = useGame();
   const [isOpen, setIsOpen] = useState(false);
 
   const closeScoreboard = () => setIsOpen(false);
@@ -51,8 +51,11 @@ const Scoreboard = ({ children, players }) => {
                   );
                 })}
               </Row>
-              <Row justifyContent="flex-end">
+              <Row justifyContent="space-between" flexDirection="row-reverse">
                 <Button onClick={closeScoreboard}>Close</Button>
+                {players[selfId].isCreator && (
+                  <DestructiveButton onClick={handleReset}>Reset</DestructiveButton>
+                )}
               </Row>
             </ScoreModalContent>
           </ScoreModal>
