@@ -119,6 +119,21 @@ const setDealer = playersCollection => {
   }, {});
 };
 
+const reset = playersCollection => {
+  const players = Object.values(playersCollection);
+  return players.reduce((playersPopulated, player) => {
+    return {
+      ...playersPopulated,
+      [player.id]: {
+        ...player,
+        hasDiscoveredHisCards: false,
+        isReady: false,
+        cards: []
+      }
+    };
+  }, {});
+};
+
 module.exports = {
   add,
   areAllReady,
@@ -130,6 +145,7 @@ module.exports = {
   getNext,
   getRandom,
   hasAllDiscoveredHisCards,
+  reset,
   setAllIsReady,
   setDealer
 };

@@ -51,7 +51,7 @@ io.on('connection', socket => {
       // Want to create
       game = Game.create(gameName);
       // Add player to the game
-      const player = Player.create(playerName);
+      const player = Player.create(playerName, true);
       game = Game.addPlayer(game, player);
       // Save
       FakeDB.saveGame(game);
@@ -229,6 +229,17 @@ io.on('connection', socket => {
     }
     // Save
     FakeDB.saveGame(game);
+    // Respond to clients
+    sendGameUpdateToClients(gameId);
+  });
+
+  socket.on('game.reset', ({ gameId, playerId }) => {
+    let game = FakeDB.getGame(gameId);
+    if (game.players[playerId].isCreator) {
+      game = Game.reset(game);
+      // Save
+      FakeDB.saveGame(game);
+    }
     // Respond to clients
     sendGameUpdateToClients(gameId);
   });

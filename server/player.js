@@ -24,10 +24,11 @@ const calcScores = (player, isFirstToFinish = false, hasCaracoleSucceed) => {
   };
 };
 
-const create = name => ({
+const create = (name, isCreator = false) => ({
   cards: [],
   hasDiscoveredHisCards: false,
   id: uuidv4(),
+  isCreator,
   isDealer: false, // The player who distribute the cards
   isReady: false, // Is ready to start a game
   name,
