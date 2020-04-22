@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 
 import theme from '../theme';
 
@@ -17,6 +17,15 @@ export const FrontCard = styled(StyledImg)`
 `;
 
 export const BackCard = styled(StyledImg)``;
+
+const shakingAnimation = keyframes`
+	0% {
+    transform: rotate(-1deg);
+	}
+	50% {
+    transform: rotate(1deg);
+	}
+`;
 
 export const PlayingCardInner = styled.div`
   height: 100%;
@@ -81,12 +90,14 @@ export const PlayingCardWrapper = styled.div`
   ${props =>
     props.isSelected &&
     css`
-      transform: scale(1.1);
-      box-shadow: 0 0 2px 2px ${theme.color.governorBay};
+      transform: scale(1.04);
+
+      ${PlayingCardInner} {
+        animation: ${shakingAnimation} 0.3s ease-in-out infinite;
+      }
 
       &:hover {
-        box-shadow: 2px 8px 10px ${theme.color.shadow};
-        transform: scale(1.15);
+        transform: scale(1.1);
       }
     `}
   

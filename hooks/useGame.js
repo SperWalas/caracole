@@ -60,8 +60,9 @@ export const GameProvider = ({ children }) => {
 
   const selectCard = (card, action) => {
     const { id: cardId, belongsTo } = card;
+
     // Cannot select his own cards on joker action
-    if (action.action === 'swap' && belongsTo === selfId) {
+    if (action === 'swap' && belongsTo === selfId) {
       return;
     }
 
@@ -81,6 +82,16 @@ export const GameProvider = ({ children }) => {
           selectedCard.id === cardOfPlayerAlreadySelected.id ? card : selectedCard
         )
       );
+    }
+
+    // If player must select one of his card in exchange action
+    if (
+      action === 'exchange' &&
+      selectedCards.length &&
+      !selectedCards.find(c => c.belongsTo === selfId) &&
+      belongsTo !== selfId
+    ) {
+      return;
     }
     // Add
     return setSelectedCards([...selectedCards, card]);
