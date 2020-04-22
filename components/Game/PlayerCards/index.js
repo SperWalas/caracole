@@ -9,7 +9,11 @@ const PlayerCards = ({ player, position }) => {
   const { cards, id: playerId } = player;
   const { nextAction, nextPlayer } = useCardActions();
   const { setCardSpotRef } = useCardSpots();
-  const spots = Array.apply(null, Array(Math.max(cards.length, 4)));
+  // Find maximum spot used
+  const [lastCard] = cards.sort((c1, c2) => (c1.spot > c2.spot ? 1 : -1)).slice(-1);
+  const nbrOfSpots = lastCard ? Math.max(parseInt(lastCard.spot.slice(-1)) + 1, 4) : 4;
+
+  const spots = Array.apply(null, Array(nbrOfSpots));
   const isPlayerToPlay = nextPlayer && nextAction && playerId === nextPlayer.id;
 
   return (
