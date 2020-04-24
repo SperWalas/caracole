@@ -56,4 +56,38 @@ const Button = styled.button`
   }
 `;
 
+export const DestructiveButton = styled(Button)`
+  ${resetButton()};
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${`${theme.spacing.s1} ${theme.spacing.s2}`};
+  border-radius: ${theme.metric.borderRadius};
+  font-size: ${theme.fontSize.normal};
+  line-height: ${theme.lineHeight.normal};
+  vertical-align: middle;
+  text-decoration: none;
+  text-align: center;
+  color: ${theme.color.danger};
+  background-color: ${theme.color.white};
+  ${borderify(theme.color.danger)};
+
+  &:disabled {
+    opacity: 0.2;
+  }
+
+  &:not(:disabled) {
+    &:hover {
+      cursor: pointer;
+      color: ${theme.color.white};
+      background-color: ${theme.color.danger};
+    }
+
+    &:active {
+      background-color: ${theme.color.danger};
+    }
+  }
+`;
+
 export default Button;

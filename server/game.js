@@ -170,6 +170,14 @@ const removeDrawCard = game => {
   };
 };
 
+const reset = game => {
+  return {
+    ...create(game.name),
+    id: game.id,
+    players: Players.reset(game.players)
+  };
+};
+
 const setCaracolePlayer = (game, playerId) => {
   const { players } = game;
 
@@ -588,6 +596,7 @@ module.exports = {
   isDone,
   removeDiscardCard,
   removeDrawCard,
+  reset,
   setCaracolePlayer,
   setCardAsFailedCard,
   setCardAsPickedCard,

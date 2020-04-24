@@ -32,6 +32,7 @@ const theme = {
   },
   color: {
     ...color,
+    ...colorForStatus,
 
     primary: color.governorBay,
     primaryHover: darken(0.05, color.governorBay),

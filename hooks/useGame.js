@@ -41,6 +41,10 @@ export const GameProvider = ({ children }) => {
     socket.emit('game.playerTriggerCaracole', { gameId: game.id, playerId: player.id });
   };
 
+  const handleReset = () => {
+    socket.emit('game.reset', { gameId: game.id, playerId: selfId });
+  };
+
   const hideCard = card => {
     setUnfoldedCards(unfoldedCards.filter(({ id }) => id !== card.id));
   };
@@ -103,6 +107,7 @@ export const GameProvider = ({ children }) => {
     handlePlayerHasDiscoveredHisCards,
     handlePlayerIsReady,
     handlePlayerTriggerCaracole,
+    handleReset,
     hideCard,
     resetCards,
     revealCard,
