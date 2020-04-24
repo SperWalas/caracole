@@ -2,10 +2,30 @@ const uuidv4 = require('uuid').v4;
 
 const Cards = require('./cards');
 
-const addCard = (player, cardToAdd) => ({
-  ...player,
-  cards: [cardToAdd, ...player.cards]
-});
+const addCard = (player, cardToAdd) => {
+  const { cards, id } = player;
+  let playerSpotIndex = null;
+  let idx = 0;
+
+  while (playerSpotIndex === null) {
+    if (!cards.find(card => card.spot === `player${id}_${idx}`)) {
+      playerSpotIndex = idx;
+    }
+    idx++;
+  }
+
+  const newCard = {
+    ...cardToAdd,
+    spot: `player${id}_${playerSpotIndex}`,
+    belongsTo: id,
+    playerSpotIndex: playerSpotIndex
+  };
+
+  return {
+    ...player,
+    cards: [newCard, ...cards]
+  };
+};
 
 const calcScores = (player, isFirstToFinish = false, hasCaracoleSucceed) => {
   let score = Cards.calcScore(player.cards);
