@@ -184,20 +184,6 @@ const setCaracolePlayer = (game, playerId) => {
   };
 };
 
-const setCardAsPickedCard = (game, playerId, cardId) => {
-  const { cards, players, nextActions: oldActions } = game;
-  const player = players[playerId];
-
-  // Next action: Player should throw a card
-  const nextAction = { player, action: 'throw' };
-
-  return {
-    ...game,
-    cards: cards.map(card => (card.id === cardId ? { ...card, spot: 'picked-card' } : card)),
-    nextActions: [nextAction, ...oldActions.slice(1)]
-  };
-};
-
 const setCardIsBeingWatchedBy = (game, playerId, cardId) => {
   const { cards } = game;
 
@@ -318,6 +304,40 @@ const setCardToDiscardPileAndReplaceByPickedCard = (game, playerId, cardId) => {
       ...playersCollection,
       [player.id]: player
     }
+  };
+};
+
+const setDiscardCardAsPickedCard = (game, playerId, cardId) => {
+  const { players, nextActions: oldActions } = game;
+  const player = players[playerId];
+
+  // Next action: Player should throw a card
+  const nextAction = { player, action: 'throw' };
+  const updateGame = removeDiscardCard(game);
+
+  return {
+    ...updateGame,
+    cards: updateGame.cards.map(card =>
+      card.id === cardId ? { ...card, spot: 'picked-card' } : card
+    ),
+    nextActions: [nextAction, ...oldActions.slice(1)]
+  };
+};
+
+const setDrawCardAsPickedCard = (game, playerId, cardId) => {
+  const { players, nextActions: oldActions } = game;
+  const player = players[playerId];
+
+  // Next action: Player should throw a card
+  const nextAction = { player, action: 'throw' };
+  const updateGame = removeDrawCard(game);
+
+  return {
+    ...updateGame,
+    cards: updateGame.cards.map(card =>
+      card.id === cardId ? { ...card, spot: 'picked-card' } : card
+    ),
+    nextActions: [nextAction, ...oldActions.slice(1)]
   };
 };
 
@@ -590,10 +610,11 @@ module.exports = {
   removeDrawCard,
   setCaracolePlayer,
   setCardAsFailedCard,
-  setCardAsPickedCard,
   setCardIsBeingWatchedBy,
   setCardToDiscardPile,
   setCardToDiscardPileAndReplaceByPickedCard,
+  setDiscardCardAsPickedCard,
+  setDrawCardAsPickedCard,
   setDrawCardToPlayer,
   setFailedCardToPlayer,
   setPickedCardToDiscardPile,
