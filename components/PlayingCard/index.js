@@ -40,7 +40,8 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
 
   const isCardVisible =
     ((isInDiscardPile || isUnfolded || isFailedCard) && !isInDrawPile && !isPickedCard) ||
-    (isSelfToPlay && isPickedCard);
+    (isSelfToPlay && isPickedCard) ||
+    (!game.isReady && isInPlayersHand);
 
   const canDiscover =
     !game.isStarted && (cardSpot === `player${selfId}_1` || cardSpot === `player${selfId}_3`);
