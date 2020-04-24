@@ -132,7 +132,7 @@ io.on('connection', socket => {
     let game = FakeDB.getGame(gameId);
     const [drawCard] = game.drawPile;
     // game = Game.removeDrawCard(game, drawCard.id);
-    game = Game.setCardAsPickedCard(game, playerId, drawCard.id);
+    game = Game.setDrawCardAsPickedCard(game, playerId, drawCard.id);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
@@ -151,8 +151,7 @@ io.on('connection', socket => {
   socket.on('game.playerPickDiscardCard', ({ gameId, playerId }) => {
     let game = FakeDB.getGame(gameId);
     const [discardCard] = game.discardPile.slice(-1);
-    // game = Game.removeDiscardCard(game);
-    game = Game.setCardAsPickedCard(game, playerId, discardCard.id);
+    game = Game.setDiscardCardAsPickedCard(game, playerId, discardCard.id);
     // Save
     FakeDB.saveGame(game);
     // Respond to clients
