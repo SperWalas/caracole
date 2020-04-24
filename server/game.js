@@ -341,32 +341,38 @@ const setDrawCardToPlayer = (game, playerId) => {
 const setCardAsFailedCard = (game, playerId, cardId) => {
   const { cards, players, nextActions: oldActions } = game;
   const player = players[playerId];
+  const cardPlayer = cards.find(c => c.id === cardId);
 
   // Next action: Player should get his card back
-  const nextAction = {
-    player,
-    action: 'pickFailed'
-  };
+  const nextActions = [
+    {
+      player: players[cardPlayer.belongsTo],
+      action: 'pickFailed'
+    },
+    {
+      player,
+      action: 'pickDrawAfterFail'
+    }
+  ];
 
   return {
     ...game,
     cards: cards.map(card =>
       card.id === cardId ? { ...card, spot: 'failed-card', oldSpot: card.spot } : card
     ),
-    nextActions: [nextAction, ...oldActions]
+    nextActions: [...nextActions, ...oldActions]
   };
 };
 
-const setFailedCardToPlayer = (game, playerId) => {
-  const { cards, nextActions: oldActions, players } = game;
-  const player = players[playerId];
+const setFailedCardToPlayer = game => {
+  const { cards, nextActions: oldActions } = game;
 
   return {
     ...game,
     cards: cards.map(card =>
       card.spot === 'failed-card' ? { ...card, spot: card.oldSpot } : card
     ),
-    nextActions: [{ player, action: 'pickDrawAfterFail' }, ...oldActions.slice(1)]
+    nextActions: oldActions.slice(1)
   };
 };
 
