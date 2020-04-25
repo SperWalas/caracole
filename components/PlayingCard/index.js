@@ -66,7 +66,7 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
   // TODO: allow watch the top card of the draw pile
   const canWatch = isSelfToPlay && nextAction === 'watch' && isInPlayersHand;
 
-  const canPlay = canDiscover || canGive || canPick || canSelect || canThrow || canWatch;
+  const canPlay = canDiscover || canGive || canPick || canSelect || canWatch;
 
   return (
     <PlayingCardWrapper
