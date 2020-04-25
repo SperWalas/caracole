@@ -47,7 +47,6 @@ export const CardActionsProvider = ({ children }) => {
   }, [gameId, resetCards, selectedCards, selectedCardsCount]);
 
   const handleCardClick = card => {
-    console.log('handleCardClick');
     const isSelf = card.belongsTo === selfId;
 
     if (!isStarted) {
@@ -96,16 +95,25 @@ export const CardActionsProvider = ({ children }) => {
         return selectCard(card, nextAction);
       }
 
-      if (nextAction === 'throw' && card.spot === 'picked-card') {
-        return handleThrowPickedCard();
-      }
-
       if (nextAction === 'watch') {
         return !unfoldedCardsCount ? handleWatchCard(card) : handleHasWatchedCard(card);
       }
     }
-    // No action? the player want to throw the card then
-    return handleThrowCard(card);
+  };
+
+  const handleCardDoubleClick = card => {
+    const isSelf = card.belongsTo === selfId;
+
+    if (isStarted) {
+      if (nextAction === 'throw' && card.spot === 'picked-card') {
+        return handleThrowPickedCard();
+      }
+      if (nextAction === 'throw' && !isSelf) {
+        return;
+      }
+      // The player want to throw the card
+      return handleThrowCard(card);
+    }
   };
 
   const handleGiveCard = ({ id: cardId }) => {
@@ -186,6 +194,7 @@ export const CardActionsProvider = ({ children }) => {
     <CardActionsContext.Provider
       value={{
         handleCardClick,
+        handleCardDoubleClick,
         isSelfToPlay,
         nextAction,
         nextPlayer

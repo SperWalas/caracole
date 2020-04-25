@@ -77,7 +77,7 @@ export const PlayingCardWrapper = styled.div`
         `}
 
   ${props =>
-    props.onClick &&
+    (props.onClick || props.onDoubleClick) &&
     css`
       &:hover {
         cursor: pointer;
