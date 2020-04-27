@@ -124,12 +124,14 @@ const givePlayerCard = (game, playerId, cardId) => {
   const { nextActions: oldActions, players } = game;
   // Find to whom player should give
   const [{ playerToAddACard }] = oldActions;
+  // Add card to player
+  const newGame = addCardToPlayer(game, playerToAddACard.id, cardId);
   const playerToRemoveACard = players[playerId];
 
   return {
-    ...addCardToPlayer(game, playerToAddACard.id, cardId),
+    ...newGame,
     players: {
-      ...players,
+      ...newGame.players,
       [playerToRemoveACard.id]: Player.removeCard(playerToRemoveACard, cardId)
     }
   };
