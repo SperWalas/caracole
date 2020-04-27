@@ -107,6 +107,11 @@ const isDone = game => {
   const { caracolePlayer, players: playersCollection, nextActions } = game;
 
   const [nextAction] = nextActions;
+
+  if (nextAction.action === 'give') {
+    return false;
+  }
+
   // If final round after calling caracol is done, game's end
   if (
     caracolePlayer &&
@@ -124,12 +129,14 @@ const givePlayerCard = (game, playerId, cardId) => {
   const { nextActions: oldActions, players } = game;
   // Find to whom player should give
   const [{ playerToAddACard }] = oldActions;
+  // Add card to player
+  const newGame = addCardToPlayer(game, playerToAddACard.id, cardId);
   const playerToRemoveACard = players[playerId];
 
   return {
-    ...addCardToPlayer(game, playerToAddACard.id, cardId),
+    ...newGame,
     players: {
-      ...players,
+      ...newGame.players,
       [playerToRemoveACard.id]: Player.removeCard(playerToRemoveACard, cardId)
     }
   };

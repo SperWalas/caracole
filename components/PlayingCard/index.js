@@ -1,6 +1,7 @@
 import React from 'react';
 
 import useCardActions from '../../hooks/useCardActions';
+import useClickPreventionOnDoubleClick from '../../hooks/useClickPreventionOnDoubleClick';
 import useCardSpots, {
   DISCARD_PILE_SPOT_ID,
   DRAW_PILE_SPOT_ID,
@@ -21,8 +22,12 @@ const SUIT_LETTER = {
 
 const PlayingCard = ({ card, className, isRotated = false }) => {
   const { cardSpots } = useCardSpots();
-  const { handleCardClick, isSelfToPlay, nextAction } = useCardActions();
+  const { handleCardClick, handleCardDoubleClick, isSelfToPlay, nextAction } = useCardActions();
   const { game, selectedCards, selfId, unfoldedCards } = useGame();
+  const [handleClick, handleDoubleClick] = useClickPreventionOnDoubleClick(
+    () => handleCardClick(card),
+    () => handleCardDoubleClick(card)
+  );
 
   const { id, isBeingWatchedBy, suit, value } = card;
   const suitLetter = SUIT_LETTER[suit];
@@ -53,13 +58,15 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
   const canSelect =
     isSelfToPlay && (nextAction === 'exchange' || nextAction === 'swap') && isInPlayersHand;
   const canThrow =
-    (game.isStarted && !isSelfToPlay && isInPlayersHand) ||
-    (isSelfToPlay && nextAction === 'throw' && (isPickedCard || isInSelfPlayersHand)) ||
-    (isSelfToPlay && nextAction === 'pick' && isInPlayersHand);
+    game.isStarted &&
+    nextAction !== 'give' &&
+    nextAction !== 'pickFailed' &&
+    nextAction !== 'pickDrawAfterFail' &&
+    (isInPlayersHand || (nextAction === 'throw' && isSelfToPlay && isPickedCard));
   // TODO: allow watch the top card of the draw pile
   const canWatch = isSelfToPlay && nextAction === 'watch' && isInPlayersHand;
 
-  const canPlay = canDiscover || canGive || canPick || canSelect || canThrow || canWatch;
+  const canPlay = canDiscover || canGive || canPick || canSelect || canWatch;
 
   return (
     <PlayingCardWrapper
@@ -67,7 +74,9 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
       isRotated={isRotated}
       isSelected={isSelected}
       isFailedCard={isFailedCard}
-      {...(canPlay ? { onClick: () => handleCardClick(card) } : {})}
+      {...(canPlay ? { onClick: handleClick } : {})}
+      {...(canThrow ? { onDoubleClick: handleDoubleClick } : {})}
+      {...(!canThrow && canPlay ? { onClick: () => handleCardClick(card) } : {})}
     >
       <PlayingCardInner isHidden={!isCardVisible}>
         {isBeingWatchedBy && isBeingWatchedBy !== selfId && <StyledEye src={'/assets/eye.svg'} />}
