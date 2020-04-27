@@ -175,10 +175,6 @@ io.on('connection', socket => {
 
     if (currentAction.player.id === playerId && currentAction.action === 'throw') {
       game = Game.setCardToDiscardPileAndReplaceByPickedCard(game, playerId, cardId);
-      // Check if game is done
-      if (Game.isDone(game)) {
-        game = Game.end(game);
-      }
     }
     // If a player throws his or someone's card
     else if (Game.isCardCanBeThrown(game, cardId)) {
@@ -188,6 +184,10 @@ io.on('connection', socket => {
     else {
       // Set the card to be visible by everyone
       game = Game.setCardAsFailedCard(game, playerId, cardId);
+    }
+    // Check if game is done
+    if (Game.isDone(game)) {
+      game = Game.end(game);
     }
     // Save
     FakeDB.saveGame(game);

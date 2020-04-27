@@ -107,6 +107,11 @@ const isDone = game => {
   const { caracolePlayer, players: playersCollection, nextActions } = game;
 
   const [nextAction] = nextActions;
+
+  if (nextAction.action === 'give') {
+    return false;
+  }
+
   // If final round after calling caracol is done, game's end
   if (
     caracolePlayer &&
