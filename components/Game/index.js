@@ -65,23 +65,37 @@ const Game = () => {
 
   return (
     <Row flex="1 0" padding="s2" justifyContent="space-between">
-      <Column flex="1 0" justifyContent="space-around">
+      <Column flex={otherPlayersOrdered.length !== 4 && '1 0'} justifyContent="space-around">
         {otherPlayersOrdered.length > 1 && <LeftPlayer player={otherPlayersOrdered[0]} />}
       </Column>
 
       <Column Column flex="1 0" justifyContent="space-between" alignItems="center">
-        <Column flex="1 0">
-          {otherPlayersOrdered.length === 1 && <TopPlayer player={otherPlayersOrdered[0]} />}
-          {otherPlayersOrdered.length > 1 && <TopPlayer player={otherPlayersOrdered[1]} />}
-        </Column>
+        <Row flex="1 0" justifyContent="space-around" width="100%">
+          {otherPlayersOrdered.length === 4 ? (
+            <>
+              <TopPlayer player={otherPlayersOrdered[1]} />
+              <TopPlayer player={otherPlayersOrdered[2]} />
+            </>
+          ) : otherPlayersOrdered.length > 1 ? (
+            <TopPlayer player={otherPlayersOrdered[1]} />
+          ) : otherPlayersOrdered.length ? (
+            <TopPlayer player={otherPlayersOrdered[0]} />
+          ) : null}
+        </Row>
         {renderCenterLayout()}
         <Column flex="1 0" justifyContent="flex-end">
           <BottomPlayer player={selfPlayer} />
         </Column>
       </Column>
 
-      <Column Column flex="1 0" alignItems="flex-end" justifyContent="space-around">
-        {otherPlayersOrdered.length === 3 && <RightPlayer player={otherPlayersOrdered[2]} />}
+      <Column
+        flex={otherPlayersOrdered.length !== 4 && '1 0'}
+        alignItems="flex-end"
+        justifyContent="space-around"
+      >
+        {otherPlayersOrdered.length > 2 && (
+          <RightPlayer player={otherPlayersOrdered[otherPlayersOrdered.length - 1]} />
+        )}
       </Column>
     </Row>
   );
