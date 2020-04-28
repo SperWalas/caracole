@@ -3,7 +3,6 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const next = require('next');
 
-const { NBR_MAX_SIMULTANEOUS_GAMES } = require('./constants');
 const FakeDB = require('./fakeDB');
 const Game = require('./game');
 const Player = require('./player');
@@ -245,6 +244,10 @@ io.on('connection', socket => {
 });
 
 nextApp.prepare().then(() => {
+  app.get('/:gameName', (req, res) => {
+    return nextApp.render(req, res, '/index', { ...req.params });
+  });
+
   app.get('*', (req, res) => {
     return nextHandler(req, res);
   });

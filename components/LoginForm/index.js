@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 
 import { Column } from '../layout';
@@ -10,13 +11,17 @@ import { HeroTitle, StyledCard } from './_styled';
 import useSocket from '../../hooks/useSocket';
 
 const LoginForm = () => {
+  const { query = {} } = useRouter();
   const socket = useSocket('game.join');
   const formik = useFormik({
     initialValues: {
-      gameName: '',
+      gameName: query.gameName || '',
       playerName: ''
     },
-    onSubmit: values => socket.emit('game.join', values)
+    onSubmit: values => {
+      history.pushState({}, null, `/${values.gameName}`);
+      socket.emit('game.join', values);
+    }
   });
 
   return (

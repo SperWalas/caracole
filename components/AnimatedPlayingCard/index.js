@@ -32,6 +32,7 @@ const AnimatedPlayingCard = ({ card }) => {
   }, [cardSpots, width, height, originNode, destinationNode]);
 
   const animatedStyle = useSpring({
+    config: { mass: 1, tension: 110, friction: 25 },
     to: {
       transform: `translate3d(${offset.x}px, ${offset.y}px, 0) ${rotationAnimation}`
     }
