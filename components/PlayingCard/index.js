@@ -59,7 +59,8 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
     isSelfToPlay && (nextAction === 'exchange' || nextAction === 'swap') && isInPlayersHand;
   const canThrow =
     game.isStarted &&
-    !isUnfolded &&
+    !selectedCards.length &&
+    !unfoldedCards.length &&
     nextAction !== 'give' &&
     nextAction !== 'pickFailed' &&
     nextAction !== 'pickDrawAfterFail' &&
