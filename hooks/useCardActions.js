@@ -91,6 +91,14 @@ export const CardActionsProvider = ({ children }) => {
         return handlePickDrawCardAfterFail();
       }
 
+      if (nextAction === 'throw' && card.spot === 'picked-card') {
+        return handleThrowPickedCard();
+      }
+
+      if (nextAction === 'throw' && isSelf) {
+        return handleThrowCard(card);
+      }
+
       if (nextAction === 'exchange' || nextAction === 'swap') {
         return selectCard(card, nextAction);
       }
@@ -109,11 +117,7 @@ export const CardActionsProvider = ({ children }) => {
 
   const handleCardDoubleClick = card => {
     const isSelf = card.belongsTo === selfId;
-
     if (isStarted) {
-      if (nextAction === 'throw' && card.spot === 'picked-card') {
-        return handleThrowPickedCard();
-      }
       if (nextAction === 'throw' && !isSelf) {
         return;
       }
