@@ -96,7 +96,13 @@ export const CardActionsProvider = ({ children }) => {
       }
 
       if (nextAction === 'watch') {
-        return !unfoldedCardsCount ? handleWatchCard(card) : handleHasWatchedCard(card);
+        if (!unfoldedCardsCount) {
+          return handleWatchCard(card);
+        }
+        // Fold only unfolded card
+        if (unfoldedCards.find(c => c.id === card.id)) {
+          return handleHasWatchedCard(card);
+        }
       }
     }
   };
