@@ -91,23 +91,33 @@ export const CardActionsProvider = ({ children }) => {
         return handlePickDrawCardAfterFail();
       }
 
+      if (nextAction === 'throw' && card.spot === 'picked-card') {
+        return handleThrowPickedCard();
+      }
+
+      if (nextAction === 'throw' && isSelf) {
+        return handleThrowCard(card);
+      }
+
       if (nextAction === 'exchange' || nextAction === 'swap') {
         return selectCard(card, nextAction);
       }
 
       if (nextAction === 'watch') {
-        return !unfoldedCardsCount ? handleWatchCard(card) : handleHasWatchedCard(card);
+        if (!unfoldedCardsCount) {
+          return handleWatchCard(card);
+        }
+        // Fold only unfolded card
+        if (unfoldedCards.find(c => c.id === card.id)) {
+          return handleHasWatchedCard(card);
+        }
       }
     }
   };
 
   const handleCardDoubleClick = card => {
     const isSelf = card.belongsTo === selfId;
-
     if (isStarted) {
-      if (nextAction === 'throw' && card.spot === 'picked-card') {
-        return handleThrowPickedCard();
-      }
       if (nextAction === 'throw' && !isSelf) {
         return;
       }

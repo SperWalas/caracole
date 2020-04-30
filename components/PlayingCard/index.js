@@ -57,17 +57,23 @@ const PlayingCard = ({ card, className, isRotated = false }) => {
     (isSelfToPlay && nextAction === 'pickDrawAfterFail' && isInDrawPile);
   const canSelect =
     isSelfToPlay && (nextAction === 'exchange' || nextAction === 'swap') && isInPlayersHand;
+  const canThrowOncePicked =
+    isSelfToPlay && nextAction === 'throw' && (isPickedCard || isInSelfPlayersHand);
   const canThrow =
     game.isStarted &&
-    !isUnfolded &&
+    !selectedCards.length &&
+    !unfoldedCards.length &&
     nextAction !== 'give' &&
     nextAction !== 'pickFailed' &&
     nextAction !== 'pickDrawAfterFail' &&
-    (isInPlayersHand || (nextAction === 'throw' && isSelfToPlay && isPickedCard));
+    isInPlayersHand &&
+    // Player can't throw card when he has a picked card
+    !(nextAction === 'throw' && isSelfToPlay);
+
   // TODO: allow watch the top card of the draw pile
   const canWatch = isSelfToPlay && nextAction === 'watch' && isInPlayersHand;
 
-  const canPlay = canDiscover || canGive || canPick || canSelect || canWatch;
+  const canPlay = canDiscover || canGive || canPick || canSelect || canThrowOncePicked || canWatch;
 
   return (
     <PlayingCardWrapper
