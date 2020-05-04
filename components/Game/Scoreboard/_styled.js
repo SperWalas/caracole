@@ -12,6 +12,7 @@ export const BodyName = styled(Body)`
 export const ScoreColumnTable = styled(Column)`
   & > ${Column} {
     border-top: 1px solid ${theme.color.border};
+    padding-top: ${theme.spacing.s0};
   }
 
   & + ${Column} {
