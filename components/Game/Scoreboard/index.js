@@ -40,13 +40,20 @@ const Scoreboard = ({ children, players }) => {
                     <ScoreColumnTable flex="1" key={pid} textAlign="center" spacing="s1">
                       <BodyName bold>{name}</BodyName>
                       <Column spacing="s0">
-                        {incrementalScore.map((score, idx) => (
-                          <Body key={`${pid}${idx}`}>{score}</Body>
-                        ))}
+                        {incrementalScore.length ? (
+                          incrementalScore.map((score, idx) => (
+                            <Body
+                              key={`${pid}${idx}`}
+                              bold={idx === incrementalScore.length - 1}
+                              highlighted={idx === incrementalScore.length - 1}
+                            >
+                              {score}
+                            </Body>
+                          ))
+                        ) : (
+                          <Body>0</Body>
+                        )}
                       </Column>
-                      <Body bold highlighted>
-                        {scores.reduce((sum, score) => sum + score, 0)}
-                      </Body>
                     </ScoreColumnTable>
                   );
                 })}

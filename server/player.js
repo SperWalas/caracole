@@ -58,10 +58,12 @@ const create = (name, isCreator = false) => ({
 
 const isDone = player => !player.cards.length;
 
-const removeCard = (player, cardId) => ({
-  ...player,
-  cards: player.cards.filter(card => card.id !== cardId)
-});
+const removeCard = (player, cardId) => {
+  return {
+    ...player,
+    cards: player.cards.filter(card => card.id !== cardId)
+  };
+};
 
 const setHasDiscoveredHisCards = player => ({
   ...player,

@@ -133,6 +133,10 @@ const givePlayerCard = (game, playerId, cardId) => {
   const newGame = addCardToPlayer(game, playerToAddACard.id, cardId);
   const playerToRemoveACard = players[playerId];
 
+  if (!playerToAddACard || !playerToRemoveACard) {
+    return game;
+  }
+
   return {
     ...newGame,
     players: {
@@ -216,6 +220,10 @@ const setCardToDiscardPile = (game, playerId, cardId) => {
   let playerThrowing = playersCollection[playerId];
   let nextActions = [];
 
+  if (!cardToThrow || !player || !playerThrowing) {
+    return game;
+  }
+
   player = Player.removeCard(player, cardId);
 
   // TODO: The order of Q matter? (if multiple player put a Q)
@@ -268,6 +276,10 @@ const setCardToDiscardPileAndReplaceByPickedCard = (game, playerId, cardId) => {
   const pickedCard = cards.find(card => card.spot === 'picked-card');
   let player = playersCollection[playerId];
   let nextActions = [];
+
+  if (!cardToThrow || !player || !pickedCard) {
+    return game;
+  }
 
   // Add picked card to player
   player = Player.removeCard(player, cardToThrow.id);
@@ -407,6 +419,10 @@ const setPickedCardToDiscardPile = (game, playerId) => {
   const { cards, discardPile, drawPile, nextActions: oldActions, players } = game;
   // Get player tmp card
   let pickedCard = cards.find(card => card.spot === 'picked-card');
+  if (!pickedCard) {
+    return game;
+  }
+
   let player = players[playerId];
   let nextActions = [];
 
@@ -595,6 +611,10 @@ const swapPlayersCards = (game, cardIdsToSwap) => {
   let player2 = players[cardForPlayer2.belongsTo];
   player2 = Player.removeCard(player2, cardFromPlayer2.id);
   player2 = Player.addCard(player2, cardForPlayer2);
+
+  if (!player1 || !player2 || !cardFromPlayer1 || !cardForPlayer2) {
+    return game;
+  }
 
   return {
     ...game,
