@@ -1,4 +1,5 @@
 import React from 'react';
+import Head from 'next/head';
 
 import Game from '../components/Game';
 import { Column } from '../components/layout';
@@ -9,6 +10,9 @@ const Home = () => {
   const { game } = useGame();
   return (
     <Column flex="1 0" style={{ minHeight: '100vh' }}>
+      <Head>
+        <title>Play Caracole!</title>
+      </Head>
       {game ? <Game /> : <LoginForm />}
     </Column>
   );
