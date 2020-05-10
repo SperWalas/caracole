@@ -58,10 +58,25 @@ const create = (name, isCreator = false) => ({
 
 const isDone = player => !player.cards.length;
 
-const removeCard = (player, cardId) => {
+const removeCard = (player, cardId) => ({
+  ...player,
+  cards: player.cards.filter(card => card.id !== cardId)
+});
+
+const replaceCard = (player, cardIdToReplace, cardToAdd) => {
+  const { spot } = player.cards.find(c => c.id === cardIdToReplace);
+  const cards = player.cards.filter(card => card.id !== cardIdToReplace);
+
   return {
     ...player,
-    cards: player.cards.filter(card => card.id !== cardId)
+    cards: [
+      ...cards,
+      {
+        ...cardToAdd,
+        belongsTo: player.id,
+        spot
+      }
+    ]
   };
 };
 
@@ -81,6 +96,7 @@ module.exports = {
   create,
   isDone,
   removeCard,
+  replaceCard,
   setHasDiscoveredHisCards,
   setIsReady
 };

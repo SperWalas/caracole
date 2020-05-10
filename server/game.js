@@ -282,8 +282,7 @@ const setCardToDiscardPileAndReplaceByPickedCard = (game, playerId, cardId) => {
   }
 
   // Add picked card to player
-  player = Player.removeCard(player, cardToThrow.id);
-  player = Player.addCard(player, pickedCard);
+  player = Player.replaceCard(player, cardToThrow.id, pickedCard);
   // Remove action of throw
   oldActions = oldActions.slice(1);
   // Get next player to pick
@@ -605,12 +604,10 @@ const swapPlayersCards = (game, cardIdsToSwap) => {
   };
 
   let player1 = players[cardForPlayer1.belongsTo];
-  player1 = Player.removeCard(player1, cardFromPlayer1.id);
-  player1 = Player.addCard(player1, cardForPlayer1);
+  player1 = Player.replaceCard(player1, cardFromPlayer1.id, cardForPlayer1);
 
   let player2 = players[cardForPlayer2.belongsTo];
-  player2 = Player.removeCard(player2, cardFromPlayer2.id);
-  player2 = Player.addCard(player2, cardForPlayer2);
+  player2 = Player.replaceCard(player2, cardFromPlayer2.id, cardForPlayer2);
 
   if (!player1 || !player2 || !cardFromPlayer1 || !cardForPlayer2) {
     return game;
